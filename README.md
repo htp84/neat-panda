@@ -13,8 +13,8 @@ Neat Panda contains functions written to mimic the R package Tidyr.
 * Free software: MIT license
 
 
-##Features
-###Spread
+## Features
+### Spread
 #### R
 ```R
 library(tidyr)
@@ -25,7 +25,7 @@ gapminder2 <- gapminder %>% select(country, continent, year, pop)
 gapminder3 <- gapminder2 %>% spread(key=year, value=pop)
 head(gapminder3, n = 5)
 ```
-#####Output
+##### Output
 ```
 # A tibble: 5 x 14
   country     continent   `1952`   `1957`   `1962`   `1967`   `1972`   `1977`   `1982`   `1987`   `1992`   `1997`   `2002`   `2007`
@@ -48,7 +48,7 @@ gapminder3 = gapminder2.pipe(spread, key="year", value="pop")
 
 gapminder3.head()
 ```
-#####Output
+##### Output
 ```
        country continent      1952      1957      1962      1967      1972      1977      1982      1987      1992      1997      2002      2007
 0  Afghanistan      Asia   8425333   9240934  10267083  11537966  13079460  14880372  12881816  13867957  16317921  22227415  25268405  31889923
@@ -59,7 +59,7 @@ gapminder3.head()
 ```
 
 
-###Gather
+### Gather
 #### R
 ```R
 library(tidyr)
