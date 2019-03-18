@@ -5,6 +5,7 @@
 
 [![Build status](https://img.shields.io/travis/htp84/neat_panda.svg)](https://travis-ci.org/htp84/neat_panda)
 
+[![Coverage](https://codecov.io/github/htp84/neat_panda/coverage.svg?branch=master)](https://codecov.io/gh/htp84/neat-panda)
 
 Neat Panda contains functions written to mimic the R package Tidyr.
 
