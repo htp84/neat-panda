@@ -7,11 +7,7 @@
 
 [![Coverage](https://codecov.io/github/htp84/neat_panda/coverage.svg?branch=master)](https://codecov.io/gh/htp84/neat-panda)
 
-Neat Panda contains functions written to mimic the R package Tidyr.
-
-
-* Free software: MIT license
-
+Neat Panda contains two functions, spread and gather. These functions and its parameters are written to mimic the spread and gather functions in the R package [*tidyr*](https://tidyr.tidyverse.org/). This is done using the [*pandas*](https://pandas.pydata.org/pandas-docs/stable/) library methods [*pivot*](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.pivot.html) and [*melt*](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.melt.html).
 
 ## Features
 ### Spread
@@ -25,17 +21,6 @@ gapminder2 <- gapminder %>% select(country, continent, year, pop)
 gapminder3 <- gapminder2 %>% spread(key=year, value=pop)
 head(gapminder3, n = 5)
 ```
-##### Output
-```
-# A tibble: 5 x 14
-  country     continent   `1952`   `1957`   `1962`   `1967`   `1972`   `1977`   `1982`   `1987`   `1992`   `1997`   `2002`   `2007`
-  <fct>       <fct>        <int>    <int>    <int>    <int>    <int>    <int>    <int>    <int>    <int>    <int>    <int>    <int>
-1 Afghanistan Asia       8425333  9240934 10267083 11537966 13079460 14880372 12881816 13867957 16317921 22227415 25268405 31889923
-2 Albania     Europe     1282697  1476505  1728137  1984060  2263554  2509048  2780097  3075321  3326498  3428038  3508512  3600523
-3 Algeria     Africa     9279525 10270856 11000948 12760499 14760787 17152804 20033753 23254956 26298373 29072015 31287142 33333216
-4 Angola      Africa     4232095  4561361  4826015  5247469  5894858  6162675  7016384  7874230  8735988  9875024 10866106 12420476
-5 Argentina   Americas  17876956 19610538 21283783 22934225 24779799 26983828 29341374 31620918 33958947 36203463 38331121 40301927
-```
 #### Python
 ```python
 from neat_panda import spread
@@ -48,7 +33,18 @@ gapminder3 = gapminder2.pipe(spread, key="year", value="pop")
 
 gapminder3.head()
 ```
-##### Output
+##### Output R
+```
+# A tibble: 5 x 14
+  country     continent   `1952`   `1957`   `1962`   `1967`   `1972`   `1977`   `1982`   `1987`   `1992`   `1997`   `2002`   `2007`
+  <fct>       <fct>        <int>    <int>    <int>    <int>    <int>    <int>    <int>    <int>    <int>    <int>    <int>    <int>
+1 Afghanistan Asia       8425333  9240934 10267083 11537966 13079460 14880372 12881816 13867957 16317921 22227415 25268405 31889923
+2 Albania     Europe     1282697  1476505  1728137  1984060  2263554  2509048  2780097  3075321  3326498  3428038  3508512  3600523
+3 Algeria     Africa     9279525 10270856 11000948 12760499 14760787 17152804 20033753 23254956 26298373 29072015 31287142 33333216
+4 Angola      Africa     4232095  4561361  4826015  5247469  5894858  6162675  7016384  7874230  8735988  9875024 10866106 12420476
+5 Argentina   Americas  17876956 19610538 21283783 22934225 24779799 26983828 29341374 31620918 33958947 36203463 38331121 40301927
+```
+##### Output Python
 ```
        country continent      1952      1957      1962      1967      1972      1977      1982      1987      1992      1997      2002      2007
 0  Afghanistan      Asia   8425333   9240934  10267083  11537966  13079460  14880372  12881816  13867957  16317921  22227415  25268405  31889923
@@ -63,12 +59,49 @@ gapminder3.head()
 #### R
 ```R
 library(tidyr)
-# hitta bra exempeldata
+# gapminder3 is obtained as above
+gapminder4 <- gather(gapminder3, key="year", "value"="pop", 3:14)
+# or
+years <- c("1952", "1957", "1962", "1967", "1972", "1977", "1982", "1987", "1992", "1997", "2002", "2007")
+gapminder4 <- gather(gapminder3, key="year", "value"="pop", years)
+
+head(gapminder4, n = 5)
 ```
 #### Python
 ```python
 from neat_panda import gather
-# hitta bra exempeldata
+# gapminder3 is obtained as above
+gapminder4 = gather(gapminder3, key="year", value="pop", columns=range(2, 13))
+# or
+gapminder4 = gather(gapminder3, key="year", value="pop", columns=range(0, 2), invert_columns=True)
+# or
+years = ["1952", "1957", "1962", "1967", "1972", "1977", "1982", "1987", "1992", "1997", "2002", "2007"]
+gapminder4 = gather(gapminder3, key="year", value="pop", columns=years)
+# or
+gapminder4 = gather(gapminder3, key="year", value="pop", columns=["country", "continent"], invert_columns=True)
+
+gapminder4.head()
+```
+##### Output R
+```
+# A tibble: 5 x 4
+  country     continent year       pop
+  <fct>       <fct>     <chr>    <int>
+1 Afghanistan Asia      1952   8425333
+2 Albania     Europe    1952   1282697
+3 Algeria     Africa    1952   9279525
+4 Angola      Africa    1952   4232095
+5 Argentina   Americas  1952  17876956
+```
+##### Output Python
+```
+       country continent  year       pop
+0  Afghanistan      Asia  1952   8425333
+1      Albania    Europe  1952   1282697
+2      Algeria    Africa  1952   9279525
+3       Angola    Africa  1952   4232095
+4    Argentina  Americas  1952  17876956
+
 ```
 
 
