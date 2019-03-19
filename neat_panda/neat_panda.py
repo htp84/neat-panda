@@ -78,7 +78,7 @@ def spread(
 ) -> pd.DataFrame:
     """Behaves similar to the tidyr spread function.\n
     Does not work with multi index dataframes.
-    
+
     Parameters
     ----------
     df : pd.DataFrame
@@ -87,7 +87,7 @@ def spread(
         Column to use to make new frame’s columns
     value : str
         Column which contains values corresponding to the new frame’s columns
-    fill : Union[str, int, float], optional        	
+    fill : Union[str, int, float], optional
         Missing values will be replaced with this value.\n
         (the default is "NaN", which is numpy.nan)
     convert : bool, optional
@@ -100,7 +100,7 @@ def spread(
         If set, the names of the new columns will be given by "<key_name><sep><key_value>".\n
         E.g. if set to '-' and the key column is called 'Year' and contains 2018 and 2019 the new columns will be\n
         'Year-2018' and 'Year-2019'. (the default is None, and using previous example, the new column names will be '2018' and '2019')
-    
+
     Raises
     ------
     ValueError
@@ -170,7 +170,7 @@ def gather(
     invert_columns: bool = False,
 ) -> pd.DataFrame:
     """[summary]
-    
+
     Parameters
     ----------
     df : pd.DataFrame
@@ -187,7 +187,7 @@ def gather(
         [description] (the default is False, which [default_description])
     invert_columns : bool, optional
         [description] (the default is False, which [default_description])
-    
+
     Returns
     -------
     pd.DataFrame
