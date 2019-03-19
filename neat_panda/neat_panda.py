@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""Main module."""
 import pandas as pd
 from typing import Union, Optional, List
 from warnings import warn
@@ -17,12 +16,14 @@ def _control_types(
     _drop_na=False,
     _invert_columns=False,
 ):
+    # spread and gather
     if not isinstance(_df, pd.DataFrame):
         raise TypeError("write something")
     if not isinstance(_key, str):
         raise TypeError()
     if not isinstance(_value, str):
         raise TypeError()
+    # spread
     if isinstance(_fill, bool):
         raise TypeError()
     if not isinstance(_fill, (str, float, int)):
@@ -31,8 +32,11 @@ def _control_types(
         raise TypeError()
     if not isinstance(_sep, (str, type(None))):
         raise TypeError()
-    if not isinstance(_columns, (list, type(None))):
+    # gather
+    if not isinstance(_columns, (list, range)):
         raise TypeError()
+    if isinstance(_columns, range) and len(_df.columns) - 1 < _columns[-1]:
+        raise IndexError()
     if not isinstance(_drop_na, bool):
         raise TypeError()
     if not isinstance(_invert_columns, bool):
@@ -160,7 +164,7 @@ def gather(
     df: pd.DataFrame,
     key: str,
     value: str,
-    columns: List[str],
+    columns: Union[List[str], range],
     drop_na: bool = False,
     convert: bool = False,
     invert_columns: bool = False,
@@ -200,6 +204,13 @@ def gather(
         _invert_columns=invert_columns,
     )
     _all_columns = df.columns.to_list()
+    if isinstance(columns, range):
+        _temp_col = []
+        _index = list(columns)
+        for i, j in enumerate(_all_columns):
+            if i in _index:
+                _temp_col.append(j)
+        columns = _temp_col
     if invert_columns:
         columns = [i for i in _all_columns if i not in columns]
     _id_vars = [i for i in _all_columns if i not in columns]
