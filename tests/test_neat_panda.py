@@ -81,13 +81,17 @@ class TestTypesGather:
 
         assert df1.equals(df2)
 
+    def test_correct_length_range(self):
+        with pytest.raises(IndexError):
+            gather(df=df, key="Year", value="Actual", columns=range(2, 100))
+
     def test_test_gather(self, df=df):
         __df = gather(
             df=df,
             key="Year",
             value="Actual",
-            columns=["Country", "Continent"],
-            invert_columns=True,
+            columns=range(2, 4),
+            invert_columns=False,
             drop_na=True,
             # convert=True,
         )
