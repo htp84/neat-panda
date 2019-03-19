@@ -72,9 +72,64 @@ def spread(
     drop: bool = False,
     sep: Optional[str] = None,
 ) -> pd.DataFrame:
-    """behaves similar to the tidyr spread function.\n
-    Does not work with multi index
+    """Behaves similar to the tidyr spread function.\n
+    Does not work with multi index dataframes.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        A DataFrame
+    key : str
+        Column to use to make new frame’s columns
+    value : str
+        Column which contains values corresponding to the new frame’s columns
+    fill : Union[str, int, float], optional        	
+        Missing values will be replaced with this value.\n
+        (the default is "NaN", which is numpy.nan)
+    convert : bool, optional
+        If True, the new columns is set to the same type as the original frame's value column.\n
+        However, if fill is equal to "NaN" all columns is set to the object type since Numpy.nan is of that type\n
+        (the default is False, which ...)
+    drop : bool, optional
+        If True, all rows that contains at least one "NaN" is dropped.
+    sep : Optional[str], optional
+        If set, the names of the new columns will be given by "<key_name><sep><key_value>".\n
+        E.g. if set to '-' and the key column is called 'Year' and contains 2018 and 2019 the new columns will be\n
+        'Year-2018' and 'Year-2019'. (the default is None, and using previous example, the new column names will be '2018' and '2019')
+    
+    Raises
+    ------
+    ValueError
+        [description]
+    TypError
+        [description]
+
+    Returns
+    -------
+    pd.DataFrame
+        A widened dataframe
+
+    Example
+    -------
+    from neat_panda import spread
+    from gapminder import gapminder
+
+    gapminder2 = gapminder[["country", "continent", "year", "pop"]]
+    gapminder3 = spread(df=gapminder2, key="year", value="pop")
+    # or
+    gapminder3 = gapminder2.pipe(spread, key="year", value="pop")
+
+    print(gapminder3)
+
+           country continent      1952      1957      1962  ...
+    0  Afghanistan      Asia   8425333   9240934  10267083  ...
+    1      Albania    Europe   1282697   1476505   1728137  ...
+    2      Algeria    Africa   9279525  10270856  11000948  ...
+    3       Angola    Africa   4232095   4561361   4826015  ...
+    4    Argentina  Americas  17876956  19610538  21283783  ...
+    .          ...       ...       ...       ...       ...  ...
     """
+
     _control_types(
         _df=df, _key=key, _value=value, _fill=fill, _convert=convert, _sep=sep
     )
@@ -110,9 +165,31 @@ def gather(
     convert: bool = False,
     invert_columns: bool = False,
 ) -> pd.DataFrame:
-    """behaves similar to the tidyr gather function.\n
-    Does not work with multi index
+    """[summary]
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+        [description]
+    key : str
+        [description]
+    value : str
+        [description]
+    columns : List[str]
+        [description]
+    drop_na : bool, optional
+        [description] (the default is False, which [default_description])
+    convert : bool, optional
+        [description] (the default is False, which [default_description])
+    invert_columns : bool, optional
+        [description] (the default is False, which [default_description])
+    
+    Returns
+    -------
+    pd.DataFrame
+        [description]
     """
+
     _control_types(
         _df=df,
         _key=key,
