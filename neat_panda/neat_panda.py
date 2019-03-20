@@ -2,69 +2,7 @@
 
 import pandas as pd
 from typing import Union, Optional, List
-from warnings import warn
-
-
-def _control_types(
-    _df,
-    _key,
-    _value,
-    _fill="NaN",
-    _convert=False,
-    _sep=None,
-    _columns=[],
-    _drop_na=False,
-    _invert_columns=False,
-):
-    # spread and gather
-    if not isinstance(_df, pd.DataFrame):
-        raise TypeError("write something")
-    if not isinstance(_key, str):
-        raise TypeError()
-    if not isinstance(_value, str):
-        raise TypeError()
-    # spread
-    if isinstance(_fill, bool):
-        raise TypeError()
-    if not isinstance(_fill, (str, float, int)):
-        raise TypeError()
-    if not isinstance(_convert, bool):
-        raise TypeError()
-    if not isinstance(_sep, (str, type(None))):
-        raise TypeError()
-    # gather
-    if not isinstance(_columns, (list, range)):
-        raise TypeError()
-    if isinstance(_columns, range) and len(_df.columns) - 1 < _columns[-1]:
-        raise IndexError()
-    if not isinstance(_drop_na, bool):
-        raise TypeError()
-    if not isinstance(_invert_columns, bool):
-        raise TypeError()
-
-
-def _assure_consistent_value_dtypes(new_df, old_df, columns, value):
-    """
-    """
-    _dtype = old_df[value].dtypes
-    try:
-        new_df[columns] = new_df[columns].astype(_dtype)
-    except ValueError:
-        warn(
-            UserWarning(
-                """Because the parameter drop is set to False and NA is generated
-            when the dataframe is widened, the type of the new columns is
-            set to Object."""
-            )
-        )
-        new_df[columns] = new_df[columns].astype("O")
-    return new_df
-
-
-def _custom_columns(columns, new_columns, key, sep):
-    _cols = [i for i in columns if i not in new_columns]
-    _custom = [key + sep + i for i in new_columns]
-    return _cols + _custom
+from ._helpers import _control_types, _assure_consistent_value_dtypes, _custom_columns
 
 
 def spread(
@@ -139,24 +77,22 @@ def spread(
     )
     _drop = [key, value]
     _columns = [i for i in df.columns.tolist() if i not in _drop]
-    try:
-        _df = df.set_index(_columns).pivot(columns=key)
-    except ValueError:
-        raise ValueError("something about that ")
+    _df = df.set_index(_columns).pivot(columns=key)
     _df.columns = _df.columns.droplevel()
     new_df = pd.DataFrame(_df.to_records())
     _new_columns = [i for i in new_df.columns if i not in df.columns]
-    if drop:
-        new_df = new_df.dropna(how="any")
-    if fill != "NaN":
-        new_df[_new_columns] = new_df[_new_columns].fillna(fill)
-    if convert:
-        new_df = _assure_consistent_value_dtypes(new_df, df, _new_columns, value)
     if sep:
         custom_columns = _custom_columns(
             new_df.columns.to_list(), _new_columns, key, sep
         )
         new_df.columns = custom_columns
+        _new_columns = [i for i in new_df.columns if i not in df.columns]
+    if fill != "NaN":
+        new_df[_new_columns] = new_df[_new_columns].fillna(fill)
+    if drop:
+        new_df = new_df.dropna(how="any")
+    if convert:
+        new_df = _assure_consistent_value_dtypes(new_df, df, _new_columns, value)
     return new_df
 
 
