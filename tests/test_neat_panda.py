@@ -6,9 +6,6 @@
 import pytest
 import pandas as pd
 import numpy as np
-import warnings
-
-warnings.filterwarnings("ignore")
 
 from neat_panda import spread, gather
 
@@ -22,10 +19,10 @@ df = pd.DataFrame(
 )
 
 
-class TestTypesSpread:
+class TestsSpread:
     def test_input_types_1(self):
         with pytest.raises(TypeError):
-            spread([1, 2, 3])
+            spread(df=[1, 2, 3], key="hello", value="Goodbye")
 
     def test_input_types_key(self):
         with pytest.raises(TypeError):
@@ -35,7 +32,7 @@ class TestTypesSpread:
         with pytest.raises(TypeError):
             spread(df=df, key="Country", value=1)
 
-    def test_input_types_fill(self):
+    def test_input_types_fill_bool(self):
         with pytest.raises(TypeError):
             spread(df=df, key="Year", value="Actual", fill=True)
 
@@ -51,24 +48,43 @@ class TestTypesSpread:
         with pytest.raises(TypeError):
             spread(df=df, key="Year", value="Actual", fill=1, convert=True, sep=1)
 
+    def test_user_warning(self):
+        with pytest.warns(UserWarning):
+            _df = spread(df=df, key="Year", value="Actual", drop=False, convert=True)
+
+    def test_no_nan(self):
+        _df = spread(df=df, key="Year", value="Actual", drop=True, convert=True)
+        assert _df.isna().any().sum() == 0
+
+    def test_fill_other_than_nan(self):
+        df1 = spread(df=df, key="Year", value="Actual", fill="Hej", sep="_")
+        df2 = spread(df=df, key="Year", value="Actual", sep="_")
+        print(df1)
+        _idx1 = sorted(df1.query("Year_2019=='Hej'").index.tolist())
+        _idx2 = sorted(df2.query("Year_2019.isna()").index.tolist())
+        assert _idx1 == _idx2
+
     def test_test_spread(self):
         _df = spread(
             df=df,
             key="Year",
             value="Actual",
-            fill="hek",
+            fill="NaN",
             drop=False,
             convert=True,
             sep="_",
         )
         print()
         print(_df)
+        print()
+        print(_df.dtypes)
 
 
-class TestTypesGather:
-    df = spread(df=df, key="Year", value="Actual")
+class TestsGather:
+    df_wide = spread(df=df, key="Year", value="Actual")
+    # print(df.dtypes)
 
-    def test_equal_df(self, df=df):
+    def test_equal_df(self, df=df_wide):
         df1 = gather(
             df=df,
             key="Year",
@@ -85,7 +101,41 @@ class TestTypesGather:
         with pytest.raises(IndexError):
             gather(df=df, key="Year", value="Actual", columns=range(2, 100))
 
-    def test_test_gather(self, df=df):
+    # def test_correct_conversion(self, df=df_wide):
+    #    print()
+    #    print(df.dtypes)
+    #    print()
+    #    df = gather(
+    #        df=df, key="Year", value="Actual", columns=["2018", "2019"], convert=True
+    #    )
+    #    print(df.dtypes)
+    #
+
+    def test_correct_column_type(self):
+        with pytest.raises(TypeError):
+            gather(df=df, key="Year", value="Actual", columns="string")
+
+    def test_correct_dropna_type(self):
+        with pytest.raises(TypeError):
+            gather(
+                df=df,
+                key="Year",
+                value="Actual",
+                columns=["2018", "2019"],
+                drop_na="Yes",
+            )
+
+    def test_correct_invertcolumns_type(self):
+        with pytest.raises(TypeError):
+            gather(
+                df=df,
+                key="Year",
+                value="Actual",
+                columns=["2018", "2019"],
+                invert_columns="Yes",
+            )
+
+    def test_test_gather(self, df=df_wide):
         __df = gather(
             df=df,
             key="Year",
