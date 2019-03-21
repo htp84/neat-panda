@@ -14,7 +14,8 @@ def spread(
     drop: bool = False,
     sep: Optional[str] = None,
 ) -> pd.DataFrame:
-    """Behaves similar to the tidyr spread function.\n
+    """Spread a key-value pair across multiple columns.
+    Behaves similar to the tidyr spread function.\n
     Does not work with multi index dataframes.
 
     Parameters
@@ -29,22 +30,16 @@ def spread(
         Missing values will be replaced with this value.\n
         (the default is "NaN", which is numpy.nan)
     convert : bool, optional
-        If True, the new columns is set to the same type as the original frame's value column.\n
-        However, if fill is equal to "NaN" all columns is set to the object type since Numpy.nan is of that type\n
+        If True, the function tries to set the new columns datatypes to the original frame's value column datatype.
+        However, if fill is equal to "NaN", all columns with a 'filled' value is set to the object type since Numpy.nan is of that type\n
         (the default is False, which ...)
     drop : bool, optional
         If True, all rows that contains at least one "NaN" is dropped.
+        (the default is False)
     sep : Optional[str], optional
         If set, the names of the new columns will be given by "<key_name><sep><key_value>".\n
         E.g. if set to '-' and the key column is called 'Year' and contains 2018 and 2019 the new columns will be\n
         'Year-2018' and 'Year-2019'. (the default is None, and using previous example, the new column names will be '2018' and '2019')
-
-    Raises
-    ------
-    ValueError
-        [description]
-    TypError
-        [description]
 
     Returns
     -------
@@ -105,29 +100,34 @@ def gather(
     convert: bool = False,
     invert_columns: bool = False,
 ) -> pd.DataFrame:
-    """[summary]
+    """Collapses/unpivots multiple columns into two columns, one with the key and one with the value.
+    Behaves similir to the tidyr function gather.
 
     Parameters
     ----------
     df : pd.DataFrame
-        [description]
+        An untidy dataframe
     key : str
-        [description]
+        Name of the new key column
     value : str
-        [description]
-    columns : List[str]
-        [description]
+        Name of the new value column
+    columns : Union[List[str], range]
+        If invert_columns is set to False, as per default, the columns to unpivot.
+        If invert columns is set to True, the columns NOT to pivot. 
+        Columns should be given as a list of string or a range of columns indexes.
     drop_na : bool, optional
-        [description] (the default is False, which [default_description])
+        If True, all rows that contains at least one "NaN" is dropped.
+        (the default is False)
     convert : bool, optional
-        [description] (the default is False, which [default_description])
+        If True, the function uses infer_objects to set datatype (the default is False)
     invert_columns : bool, optional
-        [description] (the default is False, which [default_description])
+        Should be used in conjunction with columns. If set to True, the columns set will be switched to the ones not present in the list (range).
+        (the default is False)
 
     Returns
     -------
     pd.DataFrame
-        [description]
+        A tidy dataframe
     """
 
     _control_types(
