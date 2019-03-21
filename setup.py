@@ -37,6 +37,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/htp84/neat_panda",
-    version="0.6.3",
+    "0.6.4",
     zip_safe=False,
 )
