@@ -7,7 +7,13 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from neat_panda import spread, gather
+from neat_panda import (
+    spread,
+    gather,
+    clean_columns,
+    _clean_columns,
+    clean_columns_dataframe,
+)
 
 df = pd.DataFrame(
     data={
@@ -149,25 +155,91 @@ class TestsGather:
         print(__df)
 
 
+class TestsCleanColumns:
+    nasty = [
+        "Name    ",
+        "hej",
+        "  name",
+        "country",
+        "Region5",
+        "country",
+        "country-name£---",
+        "______country@name",
+        "CountryName",
+        "countryName",
+        "Country_Name",
+        1,
+    ]
+    clean = [
+        "name1",
+        "hej",
+        "name2",
+        "country1",
+        "region5",
+        "country2",
+        "country_name1",
+        "country_name2",
+        "country_name3",
+        "country_name4",
+        "country_name5",
+        "1",
+    ]
+
+    def test_type_error(self, cols=clean):
+        with pytest.raises(TypeError):
+            clean_columns(columns=tuple(cols))
+            _clean_columns(columns=tuple(cols))
+            clean_columns_dataframe(df=cols)
+
+    def test_assert_type(self, cols=clean, df=df):
+        assert isinstance(clean_columns(cols), list)
+        assert isinstance(_clean_columns(cols), list)
+        assert isinstance(clean_columns_dataframe(df), pd.DataFrame)
+        assert isinstance(clean_columns(df.columns), list)
+        assert isinstance(_clean_columns(df.columns), list)
+
+    def test_assert_correct_result_basic(self, old=nasty, new=clean):
+        assert clean_columns(old) == new
+
+    def test_assert_correct_result_custom(self, old=nasty, new=clean):
+        cols3 = _clean_columns(
+            old,
+            expressions=[
+                r"i.lower()",
+                r're.sub(r"\s+", " ", i).strip()',
+                r're.sub(r"\W+", "_", i).strip()',
+                r'i.rstrip("_").lstrip("_")',
+            ],
+            convert_duplicates=True,
+            convert_camel_case=True,
+        )
+        assert cols3 == new
+
+    def test_assert_correct_result_custom2(self):
+        a = ["-Hello-", "Goodbye?", "HelloGoodbye", "Hello_Goodbye"]
+        b = ["hello", "goodbye!", "hello_goodbye", "hello_goodbye2"]
+        c = _clean_columns(
+            a,
+            custom={"-": "", "?": "!"},
+            convert_camel_case=True,  # the expression 'i.lower()' is not needed since convert_camel_case invokes it
+            convert_duplicates=True,
+        )
+        assert c == b
+
+    def test_assert_correct_result_custom2(self):
+        a = ["-Hello-", "Goodbye?", "HelloGoodbye", "Hello_Goodbye"]
+        b = ["hello", "goodbye!", "hellogoodbye", "hello_goodbye"]
+        c = _clean_columns(
+            a,
+            custom={"-": "", "?": "!"},
+            convert_camel_case=False,
+            convert_duplicates=True,
+            expressions=["i.lower()"],
+        )
+        assert c == b
+
+
 # x = gather(df=df, key="year", value="pop", columns=["country","continent"], invert_columns=True).sort_values(by=["country", "year"]).reset_index(drop=True)
 # gapminder2 = gapminder[["country", "continent", "year", "pop"]]
 # x = spread(df=gapminder2, key="year", value="pop")
 # x.equals(gapminder2) -> False since dtyp of year is not equal
-'''
-
-@pytest.fixture
-def response():
-    """Sample pytest fixture.
-
-    See more at: http://doc.pytest.org/en/latest/fixture.html
-    """
-    # import requests
-    # return requests.get('https://github.com/audreyr/cookiecutter-pypackage')
-
-
-def test_content(response):
-    """Sample pytest test function with the pytest fixture as an argument."""
-    # from bs4 import BeautifulSoup
-    # assert 'GitHub' in BeautifulSoup(response.content).title.string
-
-'''
