@@ -9,7 +9,7 @@ import pandas_flavor as pf
 
 
 @pf.register_dataframe_method
-def clean_columnnames(
+def clean_column_names(
     object_: Union[List[Union[str, int]], pd.Index, pd.DataFrame],
     convert_duplicates: bool = True,
     convert_camel_case: bool = False,
@@ -42,14 +42,14 @@ def clean_columnnames(
         Raises TypeError if the passed object_ is not a list, pandas index or a pandas dataframe
     """
     if isinstance(object_, (list, pd.Index)):
-        columns = _clean_columnnames_list(
+        columns = _clean_column_names_list(
             columns=object_,
             convert_duplicates=convert_duplicates,
             convert_camel_case=convert_camel_case,
         )
         return columns
     elif isinstance(object_, pd.DataFrame):
-        df = _clean_columnnames_dataframe(
+        df = _clean_column_names_dataframe(
             df=object_,
             convert_duplicates=convert_duplicates,
             convert_camel_case=convert_camel_case,
@@ -61,7 +61,7 @@ def clean_columnnames(
         )
 
 
-def _clean_columnnames_list(
+def _clean_column_names_list(
     columns: Union[List[Union[str, int]], pd.Index],
     convert_duplicates: bool = True,
     convert_camel_case: bool = False,
@@ -93,7 +93,7 @@ def _clean_columnnames_list(
     List[str]\n
         Cleaned columnnames
     """
-    columns = _clean_columnnames(
+    columns = _clean_column_names(
         columns=columns,
         convert_duplicates=convert_duplicates,
         convert_camel_case=convert_camel_case,
@@ -107,7 +107,7 @@ def _clean_columnnames_list(
     return columns
 
 
-def _clean_columnnames_dataframe(
+def _clean_column_names_dataframe(
     df: pd.DataFrame, convert_duplicates: bool = True, convert_camel_case: bool = False
 ) -> pd.DataFrame:
     """Cleans messy columnames of a dataframe. Written to be a utility function. It is recommended
@@ -141,7 +141,7 @@ def _clean_columnnames_dataframe(
         raise TypeError(
             f"The passed df is a {type(df)}. It must be a pandas dataframe!"
         )
-    df.columns = _clean_columnnames_list(
+    df.columns = _clean_column_names_list(
         columns=df.columns,
         convert_duplicates=convert_duplicates,
         convert_camel_case=convert_camel_case,
@@ -149,7 +149,7 @@ def _clean_columnnames_dataframe(
     return df
 
 
-def _clean_columnnames(
+def _clean_column_names(
     columns: Union[List[Union[str, int]], pd.Index],
     custom: Dict[Any, Any] = None,
     expressions: List[str] = None,

@@ -7,14 +7,7 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from neat_panda import (
-    spread,
-    gather,
-    clean_columnnames,
-    _clean_columnnames,
-    _clean_columnnames_dataframe,
-    _clean_columnnames_list,
-)
+from neat_panda import spread, gather, clean_column_names, _clean_column_names
 
 df = pd.DataFrame(
     data={
@@ -209,32 +202,31 @@ class TestsCleanColumns:
 
     def test_type_error(self, cols=clean):
         with pytest.raises(TypeError):
-            clean_columnnames(object_=tuple(cols))
-            _clean_columnnames(columns=tuple(cols))
-            _clean_columnnames_dataframe(df=cols)
+            clean_column_names(object_=tuple(cols))
+            _clean_column_names(columns=tuple(cols))
 
     def test_assert_type(self, cols=clean, df=df):
-        assert isinstance(clean_columnnames(cols), list)
-        assert isinstance(_clean_columnnames(cols), list)
-        assert isinstance(_clean_columnnames_dataframe(df), pd.DataFrame)
-        assert isinstance(clean_columnnames(df.columns), list)
-        assert isinstance(_clean_columnnames(df.columns), list)
+        assert isinstance(clean_column_names(cols), list)
+        assert isinstance(_clean_column_names(cols), list)
+        assert isinstance(clean_column_names(df), pd.DataFrame)
+        assert isinstance(clean_column_names(df.columns), list)
+        assert isinstance(_clean_column_names(df.columns), list)
 
     def test_assert_correct_result_basic(self, old=nasty, new=clean):
-        assert clean_columnnames(old, convert_camel_case=True) == new
+        assert clean_column_names(old, convert_camel_case=True) == new
 
     def test_assert_correct_result_camel_case1(
         self, old=actual_camel_case_names, new=snake_case_names
     ):
-        assert clean_columnnames(old, convert_camel_case=True) == new
+        assert clean_column_names(old, convert_camel_case=True) == new
 
     def test_assert_errorenous_result_camel_case(
         self, old=faulty_camel_case_names, new=snake_case_names
     ):
-        assert clean_columnnames(old, convert_camel_case=True) != new
+        assert clean_column_names(old, convert_camel_case=True) != new
 
     def test_assert_correct_result_custom(self, old=nasty, new=clean):
-        cols3 = _clean_columnnames(
+        cols3 = _clean_column_names(
             old,
             expressions=[
                 r"column.lower()",
@@ -250,7 +242,7 @@ class TestsCleanColumns:
     def test_assert_correct_result_custom2(self):
         a = ["-Hello-", "Goodbye?", "HelloGoodbye", "Hello_Goodbye"]
         b = ["hello", "goodbye!", "hello_goodbye1", "hello_goodbye2"]
-        c = _clean_columnnames(
+        c = _clean_column_names(
             a,
             custom={"-": "", "?": "!"},
             convert_camel_case=True,  # the expression 'column.lower()' is not needed since convert_camel_case invokes it
@@ -261,7 +253,7 @@ class TestsCleanColumns:
     def test_assert_correct_result_custom3(self):
         a = ["-Hello-", "Goodbye?", "HelloGoodbye", "Hello_Goodbye"]
         b = ["hello", "goodbye!", "hellogoodbye", "hello_goodbye"]
-        c = _clean_columnnames(
+        c = _clean_column_names(
             a,
             custom={"-": "", "?": "!"},
             convert_camel_case=False,
@@ -274,7 +266,7 @@ class TestsCleanColumns:
         messy_cols = ["COUNTRY    ", "coNtinent£", "@@YEar   ", "actual"]
         clean_cols = df.columns.tolist()
         df.columns = messy_cols
-        df = clean_columnnames(
+        df = clean_column_names(
             df, convert_camel_case=False
         )  # convert camelcase can lead to unexpected behaviour when large and small letters ar mixed and they are not camelcase. set camelcase dfault as false. eg YEar becomes y_ear
         assert df.columns.tolist() == clean_cols
@@ -283,7 +275,7 @@ class TestsCleanColumns:
         messy_cols = ["COUNTRY    ", "coNtinent£", "@@YEar   ", "actual"]
         clean_cols = df.columns.tolist()
         df.columns = messy_cols
-        df = df.clean_columnnames(
+        df = df.clean_column_names(
             convert_camel_case=False
         )  # convert camelcase can lead to unexpected behaviour when large and small letters ar mixed and they are not camelcase.
         assert df.columns.tolist() == clean_cols
