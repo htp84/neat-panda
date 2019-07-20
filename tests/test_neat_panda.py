@@ -10,9 +10,10 @@ import numpy as np
 from neat_panda import (
     spread,
     gather,
-    clean_columns,
-    _clean_columns,
-    clean_columns_dataframe,
+    clean_columnnames,
+    _clean_columnnames,
+    _clean_columnnames_dataframe,
+    _clean_columnnames_list,
 )
 
 df = pd.DataFrame(
@@ -57,6 +58,7 @@ class TestsSpread:
     def test_user_warning(self):
         with pytest.warns(UserWarning):
             _df = spread(df=df, key="Year", value="Actual", drop=False, convert=True)
+            del _df
 
     def test_no_nan(self):
         _df = spread(df=df, key="Year", value="Actual", drop=True, convert=True)
@@ -70,7 +72,7 @@ class TestsSpread:
         _idx2 = sorted(df2.query("Year_2019.isna()").index.tolist())
         assert _idx1 == _idx2
 
-    def test_test_spread(self):
+    def test_spread(self):
         _df = spread(
             df=df,
             key="Year",
@@ -100,6 +102,19 @@ class TestsGather:
             # convert=True,
         )
         df2 = gather(df=df, key="Year", value="Actual", columns=["2018", "2019"])
+
+        assert df1.equals(df2)
+
+    def test_equal_df_method(self, df=df_wide):
+        df1 = gather(
+            df=df,
+            key="Year",
+            value="Actual",
+            columns=["Country", "Continent"],
+            invert_columns=True,
+            # convert=True,
+        )
+        df2 = df.gather(key="Year", value="Actual", columns=["2018", "2019"])
 
         assert df1.equals(df2)
 
@@ -141,7 +156,7 @@ class TestsGather:
                 invert_columns="Yes",
             )
 
-    def test_test_gather(self, df=df_wide):
+    def test_gather(self, df=df_wide):
         __df = gather(
             df=df,
             key="Year",
@@ -170,6 +185,7 @@ class TestsCleanColumns:
         "Country_Name",
         1,
     ]
+
     clean = [
         "name1",
         "hej",
@@ -185,30 +201,46 @@ class TestsCleanColumns:
         "1",
     ]
 
+    actual_camel_case_names = ["CountryName", "SubRegion", "IceHockey"]
+
+    faulty_camel_case_names = ["COuntryNaMe", "SUbRegion", "ICeHOckey"]
+
+    snake_case_names = ["country_name", "sub_region", "ice_hockey"]
+
     def test_type_error(self, cols=clean):
         with pytest.raises(TypeError):
-            clean_columns(columns=tuple(cols))
-            _clean_columns(columns=tuple(cols))
-            clean_columns_dataframe(df=cols)
+            clean_columnnames(object_=tuple(cols))
+            _clean_columnnames(columns=tuple(cols))
+            _clean_columnnames_dataframe(df=cols)
 
     def test_assert_type(self, cols=clean, df=df):
-        assert isinstance(clean_columns(cols), list)
-        assert isinstance(_clean_columns(cols), list)
-        assert isinstance(clean_columns_dataframe(df), pd.DataFrame)
-        assert isinstance(clean_columns(df.columns), list)
-        assert isinstance(_clean_columns(df.columns), list)
+        assert isinstance(clean_columnnames(cols), list)
+        assert isinstance(_clean_columnnames(cols), list)
+        assert isinstance(_clean_columnnames_dataframe(df), pd.DataFrame)
+        assert isinstance(clean_columnnames(df.columns), list)
+        assert isinstance(_clean_columnnames(df.columns), list)
 
     def test_assert_correct_result_basic(self, old=nasty, new=clean):
-        assert clean_columns(old) == new
+        assert clean_columnnames(old, convert_camel_case=True) == new
+
+    def test_assert_correct_result_camel_case1(
+        self, old=actual_camel_case_names, new=snake_case_names
+    ):
+        assert clean_columnnames(old, convert_camel_case=True) == new
+
+    def test_assert_errorenous_result_camel_case(
+        self, old=faulty_camel_case_names, new=snake_case_names
+    ):
+        assert clean_columnnames(old, convert_camel_case=True) != new
 
     def test_assert_correct_result_custom(self, old=nasty, new=clean):
-        cols3 = _clean_columns(
+        cols3 = _clean_columnnames(
             old,
             expressions=[
-                r"i.lower()",
-                r're.sub(r"\s+", " ", i).strip()',
-                r're.sub(r"\W+", "_", i).strip()',
-                r'i.rstrip("_").lstrip("_")',
+                r"column.lower()",
+                r're.sub(r"\s+", " ", column).strip()',
+                r're.sub(r"\W+", "_", column).strip()',
+                r'column.rstrip("_").lstrip("_")',
             ],
             convert_duplicates=True,
             convert_camel_case=True,
@@ -217,26 +249,44 @@ class TestsCleanColumns:
 
     def test_assert_correct_result_custom2(self):
         a = ["-Hello-", "Goodbye?", "HelloGoodbye", "Hello_Goodbye"]
-        b = ["hello", "goodbye!", "hello_goodbye", "hello_goodbye2"]
-        c = _clean_columns(
+        b = ["hello", "goodbye!", "hello_goodbye1", "hello_goodbye2"]
+        c = _clean_columnnames(
             a,
             custom={"-": "", "?": "!"},
-            convert_camel_case=True,  # the expression 'i.lower()' is not needed since convert_camel_case invokes it
+            convert_camel_case=True,  # the expression 'column.lower()' is not needed since convert_camel_case invokes it
             convert_duplicates=True,
         )
         assert c == b
 
-    def test_assert_correct_result_custom2(self):
+    def test_assert_correct_result_custom3(self):
         a = ["-Hello-", "Goodbye?", "HelloGoodbye", "Hello_Goodbye"]
         b = ["hello", "goodbye!", "hellogoodbye", "hello_goodbye"]
-        c = _clean_columns(
+        c = _clean_columnnames(
             a,
             custom={"-": "", "?": "!"},
             convert_camel_case=False,
             convert_duplicates=True,
-            expressions=["i.lower()"],
+            expressions=["column.lower()"],
         )
         assert c == b
+
+    def test_assert_correct_result_dataframe(self, df=df):
+        messy_cols = ["COUNTRY    ", "coNtinent£", "@@YEar   ", "actual"]
+        clean_cols = df.columns.tolist()
+        df.columns = messy_cols
+        df = clean_columnnames(
+            df, convert_camel_case=False
+        )  # convert camelcase can lead to unexpected behaviour when large and small letters ar mixed and they are not camelcase. set camelcase dfault as false. eg YEar becomes y_ear
+        assert df.columns.tolist() == clean_cols
+
+    def test_assert_correct_result_dataframe_method(self, df=df):
+        messy_cols = ["COUNTRY    ", "coNtinent£", "@@YEar   ", "actual"]
+        clean_cols = df.columns.tolist()
+        df.columns = messy_cols
+        df = df.clean_columnnames(
+            convert_camel_case=False
+        )  # convert camelcase can lead to unexpected behaviour when large and small letters ar mixed and they are not camelcase.
+        assert df.columns.tolist() == clean_cols
 
 
 # x = gather(df=df, key="year", value="pop", columns=["country","continent"], invert_columns=True).sort_values(by=["country", "year"]).reset_index(drop=True)
