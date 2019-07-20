@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import pandas as pd
 from typing import Union, Optional, List
 from ._helpers import _control_types, _assure_consistent_value_dtypes, _custom_columns
 
+import pandas as pd
+import pandas_flavor as pf
 
+
+@pf.register_dataframe_method
 def spread(
     df: pd.DataFrame,
     key: str,
@@ -18,36 +21,39 @@ def spread(
     Behaves similar to the tidyr spread function.\n
     Does not work with multi index dataframes.
 
+    Syntactic sugar for the pandas pivot method.
+
     Parameters
     ----------
-    df : pd.DataFrame
+    df : pd.DataFrame\n
         A DataFrame
-    key : str
+    key : str\n
         Column to use to make new frame’s columns
-    value : str
+    value : str\n
         Column which contains values corresponding to the new frame’s columns
-    fill : Union[str, int, float], optional
+    fill : Union[str, int, float], optional\n
         Missing values will be replaced with this value.\n
         (the default is "NaN", which is numpy.nan)
-    convert : bool, optional
+    convert : bool, optional\n
         If True, the function tries to set the new columns datatypes to the original frame's value column datatype.
         However, if fill is equal to "NaN", all columns with a 'filled' value is set to the object type since Numpy.nan is of that type\n
         (the default is False, which ...)
-    drop : bool, optional
+    drop : bool, optional\n
         If True, all rows that contains at least one "NaN" is dropped.
         (the default is False)
-    sep : Optional[str], optional
+    sep : Optional[str], optional\n
         If set, the names of the new columns will be given by "<key_name><sep><key_value>".\n
         E.g. if set to '-' and the key column is called 'Year' and contains 2018 and 2019 the new columns will be\n
         'Year-2018' and 'Year-2019'. (the default is None, and using previous example, the new column names will be '2018' and '2019')
 
     Returns
     -------
-    pd.DataFrame
+    pd.DataFrame\n
         A widened dataframe
 
     Example
     -------
+    ```python
     from neat_panda import spread
     from gapminder import gapminder
 
@@ -65,6 +71,7 @@ def spread(
     3       Angola    Africa   4232095   4561361   4826015  ...
     4    Argentina  Americas  17876956  19610538  21283783  ...
     .          ...       ...       ...       ...       ...  ...
+    ```python
     """
 
     _control_types(
@@ -91,6 +98,7 @@ def spread(
     return new_df
 
 
+@pf.register_dataframe_method
 def gather(
     df: pd.DataFrame,
     key: str,
@@ -105,29 +113,58 @@ def gather(
 
     Parameters
     ----------
-    df : pd.DataFrame
+    df : pd.DataFrame\n
         An untidy dataframe
-    key : str
+    key : str\n
         Name of the new key column
-    value : str
+    value : str\n
         Name of the new value column
-    columns : Union[List[str], range]
+    columns : Union[List[str], range]\n
         If invert_columns is set to False, as per default, the columns to unpivot.
-        If invert columns is set to True, the columns NOT to pivot. 
+        If invert columns is set to True, the columns NOT to pivot.
         Columns should be given as a list of string or a range of columns indexes.
-    drop_na : bool, optional
+    drop_na : bool, optional\n
         If True, all rows that contains at least one "NaN" is dropped.
         (the default is False)
     convert : bool, optional
         If True, the function uses infer_objects to set datatype (the default is False)
-    invert_columns : bool, optional
+    invert_columns : bool, optional\n
         Should be used in conjunction with columns. If set to True, the columns set will be switched to the ones not present in the list (range).
         (the default is False)
 
     Returns
     -------
-    pd.DataFrame
-        A tidy dataframe
+    pd.DataFrame\n
+        A tidy gathered dataframe
+
+    Example
+    -------
+    ```python
+    from neat_panda import gather
+    from gapminder import gapminder
+
+    gapminder2 = gapminder[["country", "continent", "year", "pop"]]
+    gapminder3 = spread(df=gapminder2, key="year", value="pop")
+
+    gapminder4 = gather(gapminder3, key="year", value="pop", columns=range(2, 13))
+    # or
+    gapminder4 = gather(gapminder3, key="year", value="pop", columns=range(0, 2), invert_columns=True)
+    # or
+    years = ["1952", "1957", "1962", "1967", "1972", "1977", "1982", "1987", "1992", "1997", "2002", "2007"]
+    gapminder4 = gather(gapminder3, key="year", value="pop", columns=years)
+    # or
+    gapminder4 = gather(gapminder3, key="year", value="pop", columns=["country", "continent"], invert_columns=True)
+
+    print(gapminder4)
+
+           country continent  year       pop
+    0  Afghanistan      Asia  1952   8425333
+    1      Albania    Europe  1952   1282697
+    2      Algeria    Africa  1952   9279525
+    3       Angola    Africa  1952   4232095
+    4    Argentina  Americas  1952  17876956
+    .          ...       ...   ...       ...
+    ```
     """
 
     _control_types(
