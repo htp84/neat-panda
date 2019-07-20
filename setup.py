@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """The setup script."""
@@ -8,7 +7,7 @@ from setuptools import setup, find_packages
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
-requirements = ["pandas"]
+requirements = ["pandas", "pandas-flavor"]
 
 setup_requirements = ["pytest-runner"]
 
@@ -24,11 +23,13 @@ setup(
         "Natural Language :: English",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
     description="Neat Panda contains functions written to mimic the R package Tidyr.",
     install_requires=requirements,
     license="MIT license",
     long_description=readme,
+    long_description_content_type="text/markdown",
     include_package_data=True,
     keywords="neat_panda",
     name="neat_panda",
@@ -37,6 +38,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/htp84/neat_panda",
-    version = "0.7.0",
+    version="0.7.0",
     zip_safe=False,
 )

@@ -7,10 +7,32 @@
 
 [![Coverage](https://codecov.io/github/htp84/neat_panda/coverage.svg?branch=master)](https://codecov.io/gh/htp84/neat-panda)
 
-Neat Panda contains two functions, spread and gather. These functions and its parameters are written to mimic the spread and gather functions in the R package [*tidyr*](https://tidyr.tidyverse.org/). This is done using the [*pandas*](https://pandas.pydata.org/pandas-docs/stable/) library methods [*pivot*](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.pivot.html) and [*melt*](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.melt.html).
+Neat Panda contains three main methods/functions, spread, gather and clean_columnames. The ideas for these methods are from the spread and gather functions in the R package [*tidyr*](https://tidyr.tidyverse.org/) and the make_clean_columns function in the R package [*janitor*](https://github.com/sfirke/janitor). 
+
+The spread function is syntactic sugar for the [*pandas*](https://pandas.pydata.org/pandas-docs/stable/) library method [*pivot*](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.pivot.html) and the gather method is syntactic sugar for the pandas method [*melt*](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.melt.html).
 
 ## Features
-### Spread
+### clean_columnnames
+```python
+from neat_panda import clean_column_names
+
+print(df.columns.tolist())
+["Country    ", "Sub$region", "Actual"]
+
+df = df.clean_column_names()
+# or
+df.columns = clean_column_names(df.columns)
+# or
+df = clean_column_names(df)
+# or
+df = df.pipe(clean_columnnames)
+
+print(df.columns.tolist())
+["country", "sub_region", "actual"]
+
+```
+
+### spread
 #### R
 ```R
 library(tidyr)
@@ -18,7 +40,7 @@ library(dplyr)
 library(gapminder)
 
 gapminder2 <- gapminder %>% select(country, continent, year, pop)
-gapminder3 <- gapminder2 %>% spread(key=year, value=pop)
+gapminder3 <- gapminder2 %>% spread(key = year, value = pop)
 head(gapminder3, n = 5)
 ```
 #### Python
@@ -27,6 +49,8 @@ from neat_panda import spread
 from gapminder import gapminder
 
 gapminder2 = gapminder[["country", "continent", "year", "pop"]]
+gapminder3 = gapminder2.spread(key="year", value="pop")
+# or
 gapminder3 = spread(df=gapminder2, key="year", value="pop")
 # or
 gapminder3 = gapminder2.pipe(spread, key="year", value="pop")
@@ -55,7 +79,7 @@ gapminder3.head()
 ```
 
 
-### Gather
+### gather
 #### R
 ```R
 library(tidyr)
