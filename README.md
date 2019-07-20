@@ -12,7 +12,7 @@ Neat Panda contains three main methods/functions, spread, gather and clean_colum
 The spread function is syntactic sugar for the [*pandas*](https://pandas.pydata.org/pandas-docs/stable/) library method [*pivot*](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.pivot.html) and the gather method is syntactic sugar for the pandas method [*melt*](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.melt.html).
 
 ## Features
-### clean_columnnames
+### clean_column_names
 ```python
 from neat_panda import clean_column_names
 
