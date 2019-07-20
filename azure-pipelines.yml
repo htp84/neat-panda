@@ -4,16 +4,30 @@
 # https://aka.ms/yaml
 
 trigger:
-- master
+- flit
 
 pool:
   vmImage: 'ubuntu-latest'
+strategy:
+  matrix:
+    Python36:
+      python.version: '3.6'
+    Python37:
+      python.version: '3.7'
+    Python38:
+      python.version: '3.8'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '$(python.version)'
+  displayName: 'Use Python $(python.version)'
 
 - script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+    python -m pip install --upgrade pip
+    pip install pandas panda-flavor pytest pytest-azurepipelines
+  displayName: 'Install dependencies'
+
+- script: |
+    pytest
+  displayName: 'run tests'
