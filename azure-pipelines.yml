@@ -25,7 +25,7 @@ steps:
 
 - script: |
     python -m pip install --upgrade pip
-    pip install pandas panda-flavor pytest pytest-azurepipelines
+    pip install pandas pandas-flavor pytest pytest-azurepipelines
   displayName: 'Install dependencies'
 
 - script: |
