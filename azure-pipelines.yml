@@ -6,29 +6,13 @@ jobs:
   - job: linux
   
   pool:
-    vmImage: ubuntu-latest
+    vmImage: 'ubuntu-latest'
   strategy:
     matrix:
       Python36:
         python.version: '3.6'
       Python37:
         python.version: '3.7'
-
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '$(python.version)'
-    displayName: 'Use Python $(python.version)'
-
-  - script: |
-      python -m pip install --upgrade pip
-      pip install pandas pandas-flavor pytest pytest-azurepipelines
-    displayName: 'Install dependencies'
-
-  - script: |
-      pytest
-    displayName: 'run tests'
-
 
   steps:
   - task: UsePythonVersion@0
@@ -73,22 +57,6 @@ jobs:
       pytest
     displayName: 'run tests'
 
-
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '$(python.version)'
-    displayName: 'Use Python $(python.version)'
-
-  - script: |
-      python -m pip install --upgrade pip
-      pip install pandas pandas-flavor pytest pytest-azurepipelines
-    displayName: 'Install dependencies'
-
-  - script: |
-      pytest
-    displayName: 'run tests'
-
 #############################################
 
   - job: windows
@@ -101,22 +69,6 @@ jobs:
         python.version: '3.6'
       Python37:
         python.version: '3.7'
-
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '$(python.version)'
-    displayName: 'Use Python $(python.version)'
-
-  - script: |
-      python -m pip install --upgrade pip
-      pip install pandas pandas-flavor pytest pytest-azurepipelines
-    displayName: 'Install dependencies'
-
-  - script: |
-      pytest
-    displayName: 'run tests'
-
 
   steps:
   - task: UsePythonVersion@0
