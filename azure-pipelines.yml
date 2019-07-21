@@ -2,7 +2,8 @@ trigger:
 - flit
 
 jobs:
- - job: linux
+
+  - job: linux
   
   pool:
     vmImage: ubuntu-latest
@@ -43,8 +44,10 @@ jobs:
   - script: |
       pytest
     displayName: 'run tests'
-    
- - job: macos
+
+#####################################
+
+  - job: macos
   
   pool:
     vmImage: macOS-10.14
@@ -85,8 +88,10 @@ jobs:
   - script: |
       pytest
     displayName: 'run tests'
-    
- - job: windows
+
+#############################################
+
+  - job: windows
   
   pool:
     vmImage: vs2017-win2016
