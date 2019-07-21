@@ -1,19 +1,97 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- master
+- flit
 
-pool:
-  vmImage: 'ubuntu-latest'
+jobs:
+  - job: linux
+    strategy:
+      matrix:
+        py36:
+          python.version: "3.6"
+        py37:
+          python.version: "3.7"
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+    pool:
+      vmImage: ubuntu-latest
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
+
+    - script: |
+        python -m pip install --upgrade pip
+        pip install pandas pandas-flavor pytest pytest-azurepipelines pytest-cov
+      displayName: 'Install dependencies'
+
+    - script: |
+        pytest --junitxml=junit/test-results.xml --cov=neat_panda tests --cov-report=xml --cov-report=html
+      displayName: 'run tests'
+      
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFiles: '**/test-*.xml'
+        testRunTitle: 'Publish test results for Python $(python.version)'
+        
+    - task: PublishCodeCoverageResults@1
+      inputs:
+        codeCoverageTool: Cobertura
+        summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+        reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
+
+#####################################
+
+  - job: macos
+  
+    pool:
+      vmImage: macOS-10.14
+    strategy:
+      matrix:
+        Python36:
+          python.version: '3.6'
+        Python37:
+          python.version: '3.7'
+
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
+
+    - script: |
+        python -m pip install --upgrade pip
+        pip install pandas pandas-flavor pytest pytest-azurepipelines
+      displayName: 'Install dependencies'
+
+    - script: |
+        pytest
+      displayName: 'run tests'
+
+#############################################
+
+  - job: windows
+  
+    pool:
+      vmImage: vs2017-win2016
+    strategy:
+      matrix:
+        Python36:
+          python.version: '3.6'
+        Python37:
+          python.version: '3.7'
+
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
+
+    - script: |
+        python -m pip install --upgrade pip
+        pip install pandas pandas-flavor pytest pytest-azurepipelines
+      displayName: 'Install dependencies'
+
+    - script: |
+        pytest
+      displayName: 'run tests'

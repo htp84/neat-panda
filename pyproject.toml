@@ -1,0 +1,22 @@
+[build-system]
+requires = ["flit"]
+build-backend = "flit.buildapi"
+
+[tool.flit.metadata]
+module = "neat_panda"
+description-file = "README.md"
+author = "Henric Sundberg"
+author-email = "henric.sundberg@gmail.com"
+home-page = "https://github.com/htp84/neat_panda"
+classifiers = ["Development Status :: 2 - Pre-Alpha",
+               "Intended Audience :: Developers",
+               "License :: OSI Approved :: MIT License",
+               "Natural Language :: English",
+               "Programming Language :: Python :: 3.6",
+               "Programming Language :: Python :: 3.7",
+    ]
+requires-python = ">=3.6"
+requires = ["pandas", "pandas-flavor"]
+
+[tool.flit.metadata.requires-extra]
+test = ["pytest", "pytest-runner"]
