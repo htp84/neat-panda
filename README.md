@@ -5,7 +5,11 @@
 
 [![Build Status](https://dev.azure.com/henricsundberg/neat_panda/_apis/build/status/htp84.neat_panda?branchName=flit)](https://dev.azure.com/henricsundberg/neat_panda/_build/latest?definitionId=1&branchName=flit)
 
-[![Coverage](https://img.shields.io/azure-devops/coverage/henricsundberg/neat_panda/1/flit.svg)]
+[![](https://img.shields.io/azure-devops/build/henricsundberg/neat_panda/1/flit.svg)]()
+
+[![](https://img.shields.io/azure-devops/coverage/henricsundberg/neat_panda/1/flit.svg)]()
+
+[![](https://img.shields.io/azure-devops/tests/henricsundberg/neat_panda/1/flit.svg?passed_label=good&failed_label=bad&skipped_label=n%2Fa</code>)]()
 
 Neat Panda contains three main methods/functions, spread, gather and clean_columnames. The ideas for these methods are from the spread and gather functions in the R package [*tidyr*](https://tidyr.tidyverse.org/) and the make_clean_columns function in the R package [*janitor*](https://github.com/sfirke/janitor). 
 
