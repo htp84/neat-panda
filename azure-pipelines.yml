@@ -2,85 +2,84 @@ trigger:
 - flit
 
 jobs:
-
   - job: linux
-  
-  pool:
-    vmImage: 'ubuntu-latest'
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python37:
-        python.version: '3.7'
+    strategy:
+      matrix:
+        py36:
+          python.version: "3.6"
+        py37:
+          python.version: "3.7"
 
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '$(python.version)'
-    displayName: 'Use Python $(python.version)'
+    pool:
+      vmImage: ubuntu-latest
 
-  - script: |
-      python -m pip install --upgrade pip
-      pip install pandas pandas-flavor pytest pytest-azurepipelines
-    displayName: 'Install dependencies'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
 
-  - script: |
-      pytest
-    displayName: 'run tests'
+    - script: |
+        python -m pip install --upgrade pip
+        pip install pandas pandas-flavor pytest pytest-azurepipelines
+      displayName: 'Install dependencies'
+
+    - script: |
+        pytest
+      displayName: 'run tests'
 
 #####################################
 
   - job: macos
   
-  pool:
-    vmImage: macOS-10.14
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python37:
-        python.version: '3.7'
+    pool:
+      vmImage: macOS-10.14
+    strategy:
+      matrix:
+        Python36:
+          python.version: '3.6'
+        Python37:
+          python.version: '3.7'
 
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '$(python.version)'
-    displayName: 'Use Python $(python.version)'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
 
-  - script: |
-      python -m pip install --upgrade pip
-      pip install pandas pandas-flavor pytest pytest-azurepipelines
-    displayName: 'Install dependencies'
+    - script: |
+        python -m pip install --upgrade pip
+        pip install pandas pandas-flavor pytest pytest-azurepipelines
+      displayName: 'Install dependencies'
 
-  - script: |
-      pytest
-    displayName: 'run tests'
+    - script: |
+        pytest
+      displayName: 'run tests'
 
 #############################################
 
   - job: windows
   
-  pool:
-    vmImage: vs2017-win2016
-  strategy:
-    matrix:
-      Python36:
-        python.version: '3.6'
-      Python37:
-        python.version: '3.7'
+    pool:
+      vmImage: vs2017-win2016
+    strategy:
+      matrix:
+        Python36:
+          python.version: '3.6'
+        Python37:
+          python.version: '3.7'
 
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '$(python.version)'
-    displayName: 'Use Python $(python.version)'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(python.version)'
+      displayName: 'Use Python $(python.version)'
 
-  - script: |
-      python -m pip install --upgrade pip
-      pip install pandas pandas-flavor pytest pytest-azurepipelines
-    displayName: 'Install dependencies'
+    - script: |
+        python -m pip install --upgrade pip
+        pip install pandas pandas-flavor pytest pytest-azurepipelines
+      displayName: 'Install dependencies'
 
-  - script: |
-      pytest
-    displayName: 'run tests'
+    - script: |
+        pytest
+      displayName: 'run tests'
