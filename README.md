@@ -3,7 +3,7 @@
 
 [![pypi](https://img.shields.io/pypi/v/neat_panda.svg)](https://pypi.python.org/pypi/neat_panda)
 
-[![Build Status](https://dev.azure.com/henricsundberg/neat_panda/_apis/build/status/htp84.neat_panda?branchName=master)](https://dev.azure.com/henricsundberg/neat_panda/_build/latest?definitionId=1&branchName=flit)
+[![Build Status](https://dev.azure.com/henricsundberg/neat_panda/_apis/build/status/htp84.neat_panda?branchName=master)](https://dev.azure.com/henricsundberg/neat_panda/_build/latest?definitionId=1&branchName=master)
 
 [![](https://img.shields.io/azure-devops/build/henricsundberg/neat_panda/1/master.svg)]()
 
