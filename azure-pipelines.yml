@@ -21,12 +21,24 @@ jobs:
 
     - script: |
         python -m pip install --upgrade pip
-        pip install pandas pandas-flavor pytest pytest-azurepipelines
+        pip install pandas pandas-flavor pytest pytest-azurepipelines pytest-cov
       displayName: 'Install dependencies'
 
     - script: |
-        pytest
+        pytest --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
       displayName: 'run tests'
+      
+    - task: PublishTestResults@2
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFiles: '**/test-*.xml'
+        testRunTitle: 'Publish test results for Python $(python.version)'
+        
+     - task: PublishCodeCoverageResults@1
+      inputs:
+        codeCoverageTool: Cobertura
+        summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+        reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
 #####################################
 
