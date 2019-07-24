@@ -2,7 +2,7 @@
 
 import re
 from collections import Counter
-from typing import Union, Optional, List, Dict, Any
+from typing import Union, List, Dict, Any
 
 import pandas as pd
 import pandas_flavor as pf

@@ -4,16 +4,19 @@
 [![pypi](https://img.shields.io/pypi/v/neat_panda.svg)](https://pypi.python.org/pypi/neat_panda)
 
 [![Build Status](https://dev.azure.com/henricsundberg/neat_panda/_apis/build/status/htp84.neat_panda?branchName=master)](https://dev.azure.com/henricsundberg/neat_panda/_build/latest?definitionId=1&branchName=master)
-
 [![](https://img.shields.io/azure-devops/build/henricsundberg/neat_panda/1/master.svg)]()
 
 [![](https://img.shields.io/azure-devops/coverage/henricsundberg/neat_panda/1/master.svg)]()
-
 [![](https://img.shields.io/azure-devops/tests/henricsundberg/neat_panda/1/master.svg?passed_label=good&failed_label=bad&skipped_label=n%2Fa</code>)]()
+
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/htp84/neat_panda.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/htp84/neat_panda/context:python)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/htp84/neat_panda.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/htp84/neat_panda/alerts/)
+
 
 Neat Panda contains three main methods/functions, spread, gather and clean_columnames. The ideas for these methods are from the spread and gather functions in the R package [*tidyr*](https://tidyr.tidyverse.org/) and the make_clean_columns function in the R package [*janitor*](https://github.com/sfirke/janitor). 
 
 The spread function is syntactic sugar for the [*pandas*](https://pandas.pydata.org/pandas-docs/stable/) library method [*pivot*](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.pivot.html) and the gather method is syntactic sugar for the pandas method [*melt*](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.melt.html).
+
 
 ## Features
 ### clean_column_names
