@@ -58,6 +58,8 @@ def spread(
     from gapminder import gapminder
 
     gapminder2 = gapminder[["country", "continent", "year", "pop"]]
+    gapminder3 = gapminder2.spread(key="year", value="pop")
+    # or
     gapminder3 = spread(df=gapminder2, key="year", value="pop")
     # or
     gapminder3 = gapminder2.pipe(spread, key="year", value="pop")
@@ -146,14 +148,14 @@ def gather(
     gapminder2 = gapminder[["country", "continent", "year", "pop"]]
     gapminder3 = spread(df=gapminder2, key="year", value="pop")
 
-    gapminder4 = gather(gapminder3, key="year", value="pop", columns=range(2, 13))
+    gapminder4 = gapminder3.gather(key="year", value="pop", columns=range(2, 13))
     # or
-    gapminder4 = gather(gapminder3, key="year", value="pop", columns=range(0, 2), invert_columns=True)
+    gapminder4 = gapminder3.gather(key="year", value="pop", columns=range(0, 2), invert_columns=True)
     # or
     years = ["1952", "1957", "1962", "1967", "1972", "1977", "1982", "1987", "1992", "1997", "2002", "2007"]
-    gapminder4 = gather(gapminder3, key="year", value="pop", columns=years)
+    gapminder4 = gapminder3.gather(key="year", value="pop", columns=years)
     # or
-    gapminder4 = gather(gapminder3, key="year", value="pop", columns=["country", "continent"], invert_columns=True)
+    gapminder4 = gapminder3.gather(key="year", value="pop", columns=["country", "continent"], invert_columns=True)
 
     print(gapminder4)
 

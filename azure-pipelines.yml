@@ -21,19 +21,19 @@ jobs:
 
     - script: |
         python -m pip install --upgrade pip
-        pip install pandas pandas-flavor pytest pytest-azurepipelines pytest-cov
+        pip install pandas pandas-flavor pytest pytest-azurepipelines pytest-cov toml
       displayName: 'Install dependencies'
 
     - script: |
         pytest --junitxml=junit/test-results.xml --cov=neat_panda tests --cov-report=xml --cov-report=html
       displayName: 'run tests'
-      
+
     - task: PublishTestResults@2
       condition: succeededOrFailed()
       inputs:
         testResultsFiles: '**/test-*.xml'
         testRunTitle: 'Publish test results for Python $(python.version)'
-        
+
     - task: PublishCodeCoverageResults@1
       inputs:
         codeCoverageTool: Cobertura
@@ -43,7 +43,7 @@ jobs:
 #####################################
 
   - job: macos
-  
+
     pool:
       vmImage: macOS-10.14
     strategy:
@@ -61,7 +61,7 @@ jobs:
 
     - script: |
         python -m pip install --upgrade pip
-        pip install pandas pandas-flavor pytest pytest-azurepipelines
+        pip install pandas pandas-flavor pytest pytest-azurepipelines toml
       displayName: 'Install dependencies'
 
     - script: |
@@ -71,7 +71,7 @@ jobs:
 #############################################
 
   - job: windows
-  
+
     pool:
       vmImage: vs2017-win2016
     strategy:
@@ -89,7 +89,7 @@ jobs:
 
     - script: |
         python -m pip install --upgrade pip
-        pip install pandas pandas-flavor pytest pytest-azurepipelines
+        pip install pandas pandas-flavor pytest pytest-azurepipelines toml
       displayName: 'Install dependencies'
 
     - script: |

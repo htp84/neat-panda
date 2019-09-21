@@ -1,5 +1,5 @@
 .vscode/
-./jupyter_testing/*
+./jupyter_testing/
 notes.txt
 
 # Byte-compiled / optimized / DLL files

@@ -7,16 +7,31 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from neat_panda import spread, gather, clean_column_names, _clean_column_names
+from neat_panda import (
+    spread,
+    gather,
+    clean_column_names,
+    _clean_column_names,
+    difference,
+    intersection,
+    symmmetric_difference,
+    _get_version_from_toml,
+    __version__,
+)
+
 
 df = pd.DataFrame(
     data={
-        "Country": ["Sweden", "Sweden", "Denmark"],
-        "Continent": ["Europe", "Europe", "Not known"],
-        "Year": [2018, 2019, 2018],
-        "Actual": [1, 2, 3],
+        "country": ["Sweden", "Sweden", "Denmark"],
+        "continent": ["Europe", "Europe", "Not known"],
+        "year": [2018, 2019, 2018],
+        "actual": [1, 2, 3],
     }
 )
+
+
+def test_version():
+    assert "0.8.0" == __version__ == _get_version_from_toml("pyproject.toml")
 
 
 class TestsSpread:
@@ -26,50 +41,50 @@ class TestsSpread:
 
     def test_input_types_key(self):
         with pytest.raises(TypeError):
-            spread(df=df, key=1, value="Actual")
+            spread(df=df, key=1, value="actual")
 
     def test_input_types_value(self):
         with pytest.raises(TypeError):
-            spread(df=df, key="Country", value=1)
+            spread(df=df, key="country", value=1)
 
     def test_input_types_fill_bool(self):
         with pytest.raises(TypeError):
-            spread(df=df, key="Year", value="Actual", fill=True)
+            spread(df=df, key="year", value="actual", fill=True)
 
     def test_input_types_fill(self):
         with pytest.raises(TypeError):
-            spread(df=df, key="Year", value="Actual", fill=pd.DataFrame)
+            spread(df=df, key="year", value="actual", fill=pd.DataFrame)
 
     def test_input_types_convert(self):
         with pytest.raises(TypeError):
-            spread(df=df, key="Year", value="Actual", fill=1, convert="True")
+            spread(df=df, key="year", value="actual", fill=1, convert="True")
 
     def test_input_types_sep(self):
         with pytest.raises(TypeError):
-            spread(df=df, key="Year", value="Actual", fill=1, convert=True, sep=1)
+            spread(df=df, key="year", value="actual", fill=1, convert=True, sep=1)
 
     def test_user_warning(self):
         with pytest.warns(UserWarning):
-            _df = spread(df=df, key="Year", value="Actual", drop=False, convert=True)
+            _df = spread(df=df, key="year", value="actual", drop=False, convert=True)
             del _df
 
     def test_no_nan(self):
-        _df = spread(df=df, key="Year", value="Actual", drop=True, convert=True)
+        _df = spread(df=df, key="year", value="actual", drop=True, convert=True)
         assert _df.isna().any().sum() == 0
 
     def test_fill_other_than_nan(self):
-        df1 = spread(df=df, key="Year", value="Actual", fill="Hej", sep="_")
-        df2 = spread(df=df, key="Year", value="Actual", sep="_")
+        df1 = spread(df=df, key="year", value="actual", fill="Hej", sep="_")
+        df2 = spread(df=df, key="year", value="actual", sep="_")
         print(df1)
-        _idx1 = sorted(df1.query("Year_2019=='Hej'").index.tolist())
-        _idx2 = sorted(df2.query("Year_2019.isna()").index.tolist())
+        _idx1 = sorted(df1.query("year_2019=='Hej'").index.tolist())
+        _idx2 = sorted(df2.query("year_2019.isna()").index.tolist())
         assert _idx1 == _idx2
 
     def test_spread(self):
         _df = spread(
             df=df,
-            key="Year",
-            value="Actual",
+            key="year",
+            value="actual",
             fill="NaN",
             drop=False,
             convert=True,
@@ -82,59 +97,59 @@ class TestsSpread:
 
 
 class TestsGather:
-    df_wide = spread(df=df, key="Year", value="Actual")
+    df_wide = spread(df=df, key="year", value="actual")
     # print(df.dtypes)
 
     def test_equal_df(self, df=df_wide):
         df1 = gather(
             df=df,
-            key="Year",
-            value="Actual",
-            columns=["Country", "Continent"],
+            key="year",
+            value="actual",
+            columns=["country", "continent"],
             invert_columns=True,
             # convert=True,
         )
-        df2 = gather(df=df, key="Year", value="Actual", columns=["2018", "2019"])
+        df2 = gather(df=df, key="year", value="actual", columns=["2018", "2019"])
 
         assert df1.equals(df2)
 
     def test_equal_df_method(self, df=df_wide):
         df1 = gather(
             df=df,
-            key="Year",
-            value="Actual",
-            columns=["Country", "Continent"],
+            key="year",
+            value="actual",
+            columns=["country", "continent"],
             invert_columns=True,
             # convert=True,
         )
-        df2 = df.gather(key="Year", value="Actual", columns=["2018", "2019"])
+        df2 = df.gather(key="year", value="actual", columns=["2018", "2019"])
 
         assert df1.equals(df2)
 
     def test_correct_length_range(self):
         with pytest.raises(IndexError):
-            gather(df=df, key="Year", value="Actual", columns=range(2, 100))
+            gather(df=df, key="year", value="actual", columns=range(2, 100))
 
     # def test_correct_conversion(self, df=df_wide):
     #    print()
     #    print(df.dtypes)
     #    print()
     #    df = gather(
-    #        df=df, key="Year", value="Actual", columns=["2018", "2019"], convert=True
+    #        df=df, key="year", value="actual", columns=["2018", "2019"], convert=True
     #    )
     #    print(df.dtypes)
     #
 
     def test_correct_column_type(self):
         with pytest.raises(TypeError):
-            gather(df=df, key="Year", value="Actual", columns="string")
+            gather(df=df, key="year", value="actual", columns="string")
 
     def test_correct_dropna_type(self):
         with pytest.raises(TypeError):
             gather(
                 df=df,
-                key="Year",
-                value="Actual",
+                key="year",
+                value="actual",
                 columns=["2018", "2019"],
                 drop_na="Yes",
             )
@@ -143,8 +158,8 @@ class TestsGather:
         with pytest.raises(TypeError):
             gather(
                 df=df,
-                key="Year",
-                value="Actual",
+                key="year",
+                value="actual",
                 columns=["2018", "2019"],
                 invert_columns="Yes",
             )
@@ -152,8 +167,8 @@ class TestsGather:
     def test_gather(self, df=df_wide):
         __df = gather(
             df=df,
-            key="Year",
-            value="Actual",
+            key="year",
+            value="actual",
             columns=range(2, 4),
             invert_columns=False,
             drop_na=True,
@@ -173,9 +188,9 @@ class TestsCleanColumns:
         "country",
         "country-name£---",
         "______country@name",
-        "CountryName",
         "countryName",
-        "Country_Name",
+        "countryName",
+        "country_Name",
         1,
     ]
 
@@ -194,9 +209,9 @@ class TestsCleanColumns:
         "1",
     ]
 
-    actual_camel_case_names = ["CountryName", "SubRegion", "IceHockey"]
+    actual_camel_case_names = ["countryName", "SubRegion", "IceHockey"]
 
-    faulty_camel_case_names = ["COuntryNaMe", "SUbRegion", "ICeHOckey"]
+    faulty_camel_case_names = ["countryNaMe", "SUbRegion", "ICeHOckey"]
 
     snake_case_names = ["country_name", "sub_region", "ice_hockey"]
 
@@ -263,22 +278,122 @@ class TestsCleanColumns:
         assert c == b
 
     def test_assert_correct_result_dataframe(self, df=df):
-        messy_cols = ["COUNTRY    ", "coNtinent£", "@@YEar   ", "actual"]
+        messy_cols = ["country    ", "continent£", "@@year   ", "actual"]
         clean_cols = df.columns.tolist()
         df.columns = messy_cols
         df = clean_column_names(
             df, convert_camel_case=False
-        )  # convert camelcase can lead to unexpected behaviour when large and small letters ar mixed and they are not camelcase. set camelcase dfault as false. eg YEar becomes y_ear
+        )  # convert camelcase can lead to unexpected behaviour when large and small letters ar mixed and they are not camelcase. set camelcase dfault as false. eg year becomes y_ear
         assert df.columns.tolist() == clean_cols
 
     def test_assert_correct_result_dataframe_method(self, df=df):
-        messy_cols = ["COUNTRY    ", "coNtinent£", "@@YEar   ", "actual"]
+        messy_cols = ["country    ", "continent£", "@@year   ", "actual"]
         clean_cols = df.columns.tolist()
         df.columns = messy_cols
         df = df.clean_column_names(
             convert_camel_case=False
         )  # convert camelcase can lead to unexpected behaviour when large and small letters ar mixed and they are not camelcase.
         assert df.columns.tolist() == clean_cols
+
+
+class TestSetOperations:
+    def test_no_difference(self, df=df):
+        assert difference(df, df).empty
+
+    def test_basic_difference1(self, df=df):
+        df2 = pd.DataFrame(
+            data={
+                "country": ["Sweden", "Sweden", "Denmark", "Norway"],
+                "continent": ["Europe", "Europe", "Not known", "Scandinavia"],
+                "year": [2018, 2019, 2018, 2020],
+                "actual": [1, 2, 3, 5],
+            }
+        )
+
+        print(difference(df, df2))
+        assert difference(df, df2).empty
+        # assert _difference(df, df2).reset_index(drop=True).equals(df3)
+
+    def test_basic_difference2(self, df=df):
+        df2 = pd.DataFrame(
+            data={
+                "country": ["Sweden", "Sweden", "Denmark", "Norway"],
+                "continent": ["Europe", "Europe", "Not known", "Scandinavia"],
+                "year": [2018, 2019, 2018, 2020],
+                "actual": [1, 2, 3, 5],
+            }
+        )
+        df3 = pd.DataFrame(
+            data={
+                "country": ["Norway"],
+                "continent": ["Scandinavia"],
+                "year": [2020],
+                "actual": [5],
+            }
+        )
+        assert difference(df2, df).reset_index(drop=True).equals(df3)
+
+    def test_basic_intersection(self, df=df):
+        df2 = pd.DataFrame(
+            data={
+                "country": ["Sweden", "Denmark", "Iceleand"],
+                "continent": ["Europe", "Not known", "Europe"],
+                "year": [2018, 2018, np.nan],
+                "actual": [1, 3, 0],
+            }
+        )
+
+        df3 = pd.DataFrame(
+            data={
+                "country": ["Sweden", "Denmark"],
+                "continent": ["Europe", "Not known"],
+                "year": [2018, 2018],
+                "actual": [1, 3],
+            }
+        )
+
+        assert intersection(df, df2).reset_index(drop=True).equals(df3)
+
+    def test_basic_symmetric_difference_names(self, df=df):
+        df1 = pd.DataFrame(
+            data={
+                "country": ["Sweden", "Sweden", "Finland"],
+                "continent": ["Europe", "Europe", "Scandinavia"],
+                "year": [2018, 2012, 2018],
+                "actual": [1, 2, 3],
+            }
+        )
+        df3 = pd.DataFrame(
+            data={
+                "country": ["Sweden", "Denmark", "Sweden", "Finland"],
+                "continent": ["Europe", "Not known", "Europe", "Scandinavia"],
+                "year": [2019, 2018, 2012, 2018],
+                "actual": [2, 3, 2, 3],
+                "original_dataframe": ["df", "df", "df1", "df1"],
+            }
+        )
+        assert symmmetric_difference(df, df1, dataframe_names=["df", "df1"]).equals(df3)
+
+    def test_basic_symmetric_difference_no_names(self, df=df):
+        df1 = pd.DataFrame(
+            data={
+                "country": ["Sweden", "Sweden", "Finland"],
+                "continent": ["Europe", "Europe", "Scandinavia"],
+                "year": [2018, 2012, 2018],
+                "actual": [1, 2, 3],
+            }
+        )
+        df3 = pd.DataFrame(
+            data={
+                "country": ["Sweden", "Denmark", "Sweden", "Finland"],
+                "continent": ["Europe", "Not known", "Europe", "Scandinavia"],
+                "year": [2019, 2018, 2012, 2018],
+                "actual": [2, 3, 2, 3],
+            }
+        )
+
+        print(symmmetric_difference(df, df1))
+        assert symmmetric_difference(df, df1).reset_index(drop=True).equals(df3)
 
 
 # x = gather(df=df, key="year", value="pop", columns=["country","continent"], invert_columns=True).sort_values(by=["country", "year"]).reset_index(drop=True)

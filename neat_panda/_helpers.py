@@ -1,5 +1,6 @@
 import pandas as pd
 from warnings import warn
+import toml
 
 
 def _control_types(
@@ -65,3 +66,11 @@ def _custom_columns(columns, new_columns, key, sep):
     _cols = [i for i in columns if i not in new_columns]
     _custom = [key + sep + i for i in new_columns]
     return _cols + _custom
+
+
+def _get_version_from_toml(path: str) -> str:
+    """
+    """
+    with open(path, "r") as f:
+        data = toml.loads(f.read())
+        return data["tool"]["poetry"]["version"]
