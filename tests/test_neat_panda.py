@@ -31,7 +31,7 @@ df = pd.DataFrame(
 
 
 def test_version():
-    assert "0.8.0" == __version__ == _get_version_from_toml("pyproject.toml")
+    assert "0.8.0.1" == __version__ == _get_version_from_toml("pyproject.toml")
 
 
 class TestsSpread:
@@ -283,7 +283,9 @@ class TestsCleanColumns:
         df.columns = messy_cols
         df = clean_column_names(
             df, convert_camel_case=False
-        )  # convert camelcase can lead to unexpected behaviour when large and small letters ar mixed and they are not camelcase. set camelcase dfault as false. eg year becomes y_ear
+        )  # convert camelcase can lead to unexpected behaviour when large and
+        # small letters ar mixed and they are not camelcase. set camelcase
+        # default as false. eg year becomes y_ear
         assert df.columns.tolist() == clean_cols
 
     def test_assert_correct_result_dataframe_method(self, df=df):
@@ -292,7 +294,8 @@ class TestsCleanColumns:
         df.columns = messy_cols
         df = df.clean_column_names(
             convert_camel_case=False
-        )  # convert camelcase can lead to unexpected behaviour when large and small letters ar mixed and they are not camelcase.
+        )  # convert camelcase can lead to unexpected behaviour when large
+        # and small letters ar mixed and they are not camelcase.
         assert df.columns.tolist() == clean_cols
 
 
@@ -394,9 +397,3 @@ class TestSetOperations:
 
         print(symmmetric_difference(df, df1))
         assert symmmetric_difference(df, df1).reset_index(drop=True).equals(df3)
-
-
-# x = gather(df=df, key="year", value="pop", columns=["country","continent"], invert_columns=True).sort_values(by=["country", "year"]).reset_index(drop=True)
-# gapminder2 = gapminder[["country", "continent", "year", "pop"]]
-# x = spread(df=gapminder2, key="year", value="pop")
-# x.equals(gapminder2) -> False since dtyp of year is not equal
