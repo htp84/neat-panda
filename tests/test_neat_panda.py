@@ -32,7 +32,7 @@ df = pd.DataFrame(
 
 
 def test_version():
-    assert "0.8.0.1" == __version__ == _get_version_from_toml("pyproject.toml")
+    assert "0.9.0" == __version__ == _get_version_from_toml("pyproject.toml")
 
 
 class TestsSpread:
