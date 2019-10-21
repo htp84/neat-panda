@@ -2,18 +2,14 @@
 # Neat Panda
 
 [![pypi](https://img.shields.io/pypi/v/neat_panda.svg)](https://pypi.python.org/pypi/neat_panda)
-
 [![Build Status](https://dev.azure.com/henricsundberg/neat_panda/_apis/build/status/htp84.neat_panda?branchName=master)](https://dev.azure.com/henricsundberg/neat_panda/_build/latest?definitionId=1&branchName=master)
 [![](https://img.shields.io/azure-devops/build/henricsundberg/neat_panda/1/master.svg)]()
-
 [![](https://img.shields.io/azure-devops/coverage/henricsundberg/neat_panda/1/master.svg)]()
 [![](https://img.shields.io/azure-devops/tests/henricsundberg/neat_panda/1/master.svg?passed_label=good&failed_label=bad&skipped_label=n%2Fa</code>)]()
-
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/htp84/neat_panda.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/htp84/neat_panda/context:python)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/htp84/neat_panda.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/htp84/neat_panda/alerts/)
+[![Supported](https://img.shields.io/pypi/pyversions/neat_panda.svg)](https://pypi.python.org/pypi/neat_panda)
 
 
-Neat Panda contains three main methods/functions, spread, gather and clean_columnames. The ideas for these methods are from the spread and gather functions in the R package [*tidyr*](https://tidyr.tidyverse.org/) and the make_clean_columns function in the R package [*janitor*](https://github.com/sfirke/janitor). 
+Neat Panda contains three main methods/functions, spread, gather and clean_columnames. The ideas for these methods are from the spread and gather functions in the R package [*tidyr*](https://tidyr.tidyverse.org/) and the make_clean_columns function in the R package [*janitor*](https://github.com/sfirke/janitor).
 
 The spread function is syntactic sugar for the [*pandas*](https://pandas.pydata.org/pandas-docs/stable/) library method [*pivot*](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.pivot.html) and the gather method is syntactic sugar for the pandas method [*melt*](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.melt.html).
 
@@ -21,18 +17,12 @@ The spread function is syntactic sugar for the [*pandas*](https://pandas.pydata.
 ## Features
 ### clean_column_names
 ```python
-from neat_panda import clean_column_names
+import neat_panda
 
 print(df.columns.tolist())
 ["Country    ", "Sub$region", "Actual"]
 
 df = df.clean_column_names()
-# or
-df.columns = clean_column_names(df.columns)
-# or
-df = clean_column_names(df)
-# or
-df = df.pipe(clean_columnnames)
 
 print(df.columns.tolist())
 ["country", "sub_region", "actual"]
@@ -52,15 +42,11 @@ head(gapminder3, n = 5)
 ```
 #### Python
 ```python
-from neat_panda import spread
+import neat_panda
 from gapminder import gapminder
 
 gapminder2 = gapminder[["country", "continent", "year", "pop"]]
 gapminder3 = gapminder2.spread(key="year", value="pop")
-# or
-gapminder3 = spread(df=gapminder2, key="year", value="pop")
-# or
-gapminder3 = gapminder2.pipe(spread, key="year", value="pop")
 
 gapminder3.head()
 ```
@@ -90,6 +76,7 @@ gapminder3.head()
 #### R
 ```R
 library(tidyr)
+
 # gapminder3 is obtained as above
 gapminder4 <- gather(gapminder3, key="year", "value"="pop", 3:14)
 # or
@@ -100,16 +87,17 @@ head(gapminder4, n = 5)
 ```
 #### Python
 ```python
-from neat_panda import gather
+import neat_panda
+
 # gapminder3 is obtained as above
-gapminder4 = gather(gapminder3, key="year", value="pop", columns=range(2, 13))
+gapminder4 = gapminder3.gather(key="year", value="pop", columns=range(2, 13))
 # or
-gapminder4 = gather(gapminder3, key="year", value="pop", columns=range(0, 2), invert_columns=True)
+gapminder4 = gapminder3.gather(key="year", value="pop", columns=range(0, 2), invert_columns=True)
 # or
 years = ["1952", "1957", "1962", "1967", "1972", "1977", "1982", "1987", "1992", "1997", "2002", "2007"]
-gapminder4 = gather(gapminder3, key="year", value="pop", columns=years)
+gapminder4 = gapminder3.gather(key="year", value="pop", columns=years)
 # or
-gapminder4 = gather(gapminder3, key="year", value="pop", columns=["country", "continent"], invert_columns=True)
+gapminder4 = gapminder3.gather(key="year", value="pop", columns=["country", "continent"], invert_columns=True)
 
 gapminder4.head()
 ```
@@ -134,8 +122,3 @@ gapminder4.head()
 4    Argentina  Americas  1952  17876956
 
 ```
-
-
-
-
-
