@@ -8,5 +8,5 @@ __version__ = "0.8.0.1"
 
 from ._tidy import spread, gather
 from ._caretaker import clean_column_names, _clean_column_names
-from ._set_operations import difference, intersection, symmmetric_difference
+from ._set_operations import difference, intersection, symmmetric_difference, union
 from ._helpers import _get_version_from_toml

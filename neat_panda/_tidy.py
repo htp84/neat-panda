@@ -23,6 +23,8 @@ def spread(
 
     Syntactic sugar for the pandas pivot method.
 
+    Does not alter the original DataFrame.
+
     Parameters
     ----------
     df : pd.DataFrame\n
@@ -73,7 +75,6 @@ def spread(
     3       Angola    Africa   4232095   4561361   4826015  ...
     4    Argentina  Americas  17876956  19610538  21283783  ...
     .          ...       ...       ...       ...       ...  ...
-    ```python
     """
 
     _control_types(
@@ -81,6 +82,12 @@ def spread(
     )
     _drop = [key, value]
     _columns = [i for i in df.columns.tolist() if i not in _drop]
+    _index_column = _columns + [key]
+    _duplicates = df.duplicated(subset=_index_column)
+    if _duplicates.sum() > 0:
+        raise ValueError(
+            f"The combination of the columns {_index_column} must be unique in order to spread the dataframe. There are {_duplicates.sum()} duplicate rows"
+        )
     _df = df.set_index(_columns).pivot(columns=key)
     _df.columns = _df.columns.droplevel()
     new_df = pd.DataFrame(_df.to_records())
@@ -112,6 +119,10 @@ def gather(
 ) -> pd.DataFrame:
     """Collapses/unpivots multiple columns into two columns, one with the key and one with the value.
     Behaves similir to the tidyr function gather.
+
+    Syntactic sugar for the pandas melt method.
+
+    Does not alter the original DataFrame.
 
     Parameters
     ----------

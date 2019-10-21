@@ -15,6 +15,7 @@ from neat_panda import (
     difference,
     intersection,
     symmmetric_difference,
+    union,
     _get_version_from_toml,
     __version__,
 )
@@ -38,6 +39,11 @@ class TestsSpread:
     def test_input_types_1(self):
         with pytest.raises(TypeError):
             spread(df=[1, 2, 3], key="hello", value="Goodbye")
+
+    def test_duplicate_rows(self, df=df):
+        with pytest.raises(ValueError):
+            df = df.append(df)
+            spread(df=df, key="year", value="actual")
 
     def test_input_types_key(self):
         with pytest.raises(TypeError):
@@ -75,7 +81,6 @@ class TestsSpread:
     def test_fill_other_than_nan(self):
         df1 = spread(df=df, key="year", value="actual", fill="Hej", sep="_")
         df2 = spread(df=df, key="year", value="actual", sep="_")
-        print(df1)
         _idx1 = sorted(df1.query("year_2019=='Hej'").index.tolist())
         _idx2 = sorted(df2.query("year_2019.isna()").index.tolist())
         assert _idx1 == _idx2
@@ -90,15 +95,10 @@ class TestsSpread:
             convert=True,
             sep="_",
         )
-        print()
-        print(_df)
-        print()
-        print(_df.dtypes)
 
 
 class TestsGather:
     df_wide = spread(df=df, key="year", value="actual")
-    # print(df.dtypes)
 
     def test_equal_df(self, df=df_wide):
         df1 = gather(
@@ -129,16 +129,6 @@ class TestsGather:
     def test_correct_length_range(self):
         with pytest.raises(IndexError):
             gather(df=df, key="year", value="actual", columns=range(2, 100))
-
-    # def test_correct_conversion(self, df=df_wide):
-    #    print()
-    #    print(df.dtypes)
-    #    print()
-    #    df = gather(
-    #        df=df, key="year", value="actual", columns=["2018", "2019"], convert=True
-    #    )
-    #    print(df.dtypes)
-    #
 
     def test_correct_column_type(self):
         with pytest.raises(TypeError):
@@ -174,8 +164,6 @@ class TestsGather:
             drop_na=True,
             # convert=True,
         )
-        print()
-        print(__df)
 
 
 class TestsCleanColumns:
@@ -312,10 +300,7 @@ class TestSetOperations:
                 "actual": [1, 2, 3, 5],
             }
         )
-
-        print(difference(df, df2))
         assert difference(df, df2).empty
-        # assert _difference(df, df2).reset_index(drop=True).equals(df3)
 
     def test_basic_difference2(self, df=df):
         df2 = pd.DataFrame(
@@ -394,6 +379,45 @@ class TestSetOperations:
                 "actual": [2, 3, 2, 3],
             }
         )
-
-        print(symmmetric_difference(df, df1))
         assert symmmetric_difference(df, df1).reset_index(drop=True).equals(df3)
+
+    def test_basic_union(self):
+        df1 = pd.DataFrame(
+            data={
+                "country": ["Sweden", "Sweden", "Finland"],
+                "continent": ["Europe", "Europe", "Scandinavia"],
+                "year": [2018, 2012, 2018],
+                "actual": [1, 2, 3],
+            }
+        )
+        df2 = pd.DataFrame(
+            data={
+                "country": ["Sweden", "Denmark", "Sweden", "Finland"],
+                "continent": ["Europe", "Not known", "Europe", "Scandinavia"],
+                "year": [2019, 2018, 2012, 2018],
+                "actual": [2, 3, 2, 3],
+            }
+        )
+        df3 = df1.append(df2).reset_index(drop=True)
+        assert union(df1, df2).equals(df3)
+
+    def test_warning_duplicates(self):
+        df1 = pd.DataFrame(
+            data={
+                "country": ["Sweden", "Sweden", "Finland"],
+                "continent": ["Europe", "Europe", "Scandinavia"],
+                "year": [2018, 2018, 2018],
+                "actual": [1, 1, 3],
+            }
+        )
+        df2 = pd.DataFrame(
+            data={
+                "country": ["Sweden", "Denmark", "Sweden", "Finland"],
+                "continent": ["Europe", "Not known", "Europe", "Scandinavia"],
+                "year": [2019, 2018, 2019, 2018],
+                "actual": [2, 3, 2, 3],
+            }
+        )
+        with pytest.warns(UserWarning):
+            union(df1, df2)
+
