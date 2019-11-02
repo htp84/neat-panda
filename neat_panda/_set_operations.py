@@ -29,8 +29,16 @@ def _control_duplicates(
     return dataframe1, dataframe2
 
 
+def _difference(dataframe1: pd.DataFrame, dataframe2: pd.DataFrame) -> pd.DataFrame:
+    """Helper method that take the differnce between two dataframes.
+
+    The code is copied from the users WeNYoBen answer to the question "Python Pandas - Find difference between two data
+    frames" at [StackOverflow](https://stackoverflow.com/questions/48647534/python-pandas-find-difference-between-two-data-frames)
+    """
+    return pd.concat([dataframe1, dataframe2, dataframe2]).drop_duplicates(keep=False)
+
 @pf.register_dataframe_method
-def difference(dataframe1: pd.DataFrame, dataframe2: pd.DataFrame):
+def difference(dataframe1: pd.DataFrame, dataframe2: pd.DataFrame) -> pd.DataFrame:
     """The set difference between dataframe1 (S) and dataframe2 (T), i.e. it returns those elements that are in dataframe1
     but not in dataframe2. Formally S - T = {s|s ∈ S and s ∉ T}.
 
@@ -63,7 +71,7 @@ def difference(dataframe1: pd.DataFrame, dataframe2: pd.DataFrame):
     dataframe1, dataframe2 = _control_duplicates(
         dataframe1=dataframe1, dataframe2=dataframe2
     )
-    return pd.concat([dataframe1, dataframe2, dataframe2]).drop_duplicates(keep=False)
+    return _difference(dataframe1=dataframe1, dataframe2=dataframe2)
 
 
 @pf.register_dataframe_method
@@ -134,8 +142,8 @@ def symmetric_difference(
     dataframe1, dataframe2 = _control_duplicates(
         dataframe1=dataframe1, dataframe2=dataframe2
     )
-    df1 = difference(dataframe1=dataframe1, dataframe2=dataframe2)
-    df2 = difference(dataframe1=dataframe2, dataframe2=dataframe1)
+    df1 = _difference(dataframe1=dataframe1, dataframe2=dataframe2)
+    df2 = _difference(dataframe1=dataframe2, dataframe2=dataframe1)
     if dataframe_names:
         df1["original_dataframe"] = dataframe_names[0]
         df2["original_dataframe"] = dataframe_names[1]
