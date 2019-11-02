@@ -67,7 +67,7 @@ def difference(dataframe1: pd.DataFrame, dataframe2: pd.DataFrame):
 
 
 @pf.register_dataframe_method
-def symmmetric_difference(
+def symmetric_difference(
     dataframe1: pd.DataFrame,
     dataframe2: pd.DataFrame,
     dataframe_names: Optional[List[str]] = None,

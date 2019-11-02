@@ -14,7 +14,7 @@ from neat_panda import (
     _clean_column_names,
     difference,
     intersection,
-    symmmetric_difference,
+    symmetric_difference,
     union,
     _get_version_from_toml,
     __version__,
@@ -32,7 +32,7 @@ df = pd.DataFrame(
 
 
 def test_version():
-    assert "0.9.0" == __version__ == _get_version_from_toml("pyproject.toml")
+    assert "0.9.1" == __version__ == _get_version_from_toml("pyproject.toml")
 
 
 class TestsSpread:
@@ -360,7 +360,7 @@ class TestSetOperations:
                 "original_dataframe": ["df", "df", "df1", "df1"],
             }
         )
-        assert symmmetric_difference(df, df1, dataframe_names=["df", "df1"]).equals(df3)
+        assert symmetric_difference(df, df1, dataframe_names=["df", "df1"]).equals(df3)
 
     def test_basic_symmetric_difference_no_names(self, df=df):
         df1 = pd.DataFrame(
@@ -379,7 +379,7 @@ class TestSetOperations:
                 "actual": [2, 3, 2, 3],
             }
         )
-        assert symmmetric_difference(df, df1).reset_index(drop=True).equals(df3)
+        assert symmetric_difference(df, df1).reset_index(drop=True).equals(df3)
 
     def test_basic_union(self):
         df1 = pd.DataFrame(
