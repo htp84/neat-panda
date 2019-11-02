@@ -90,7 +90,7 @@ def symmmetric_difference(
     Returns
     -------
     pandas DataFrame\n
-        The set difference between dataframe1 and dataframe2
+        The set symmetric difference between dataframe1 and dataframe2
 
     Raises
     ------
@@ -98,6 +98,36 @@ def symmmetric_difference(
         Raises ValueError if the columns in datframe1 and dataframe2 are not identical.
     ValueError\n
         Raises ValueError if the dataframe_names parameter is used and the length of the passed list is not 2.
+
+    Example
+    -------
+    ```python
+    import pandas as pd
+    import neat_panda
+
+    print(df1)
+
+        country  continent  year  actual
+    0   Sweden     Europe  2018       1
+    1   Sweden     Europe  2019       2
+    2  Denmark  Not known  2018       3
+
+    print(df2)
+
+        country  continent  year  actual
+    0    Sweden     Europe  2018       1
+    1   Denmark  Not known  2018       3
+    2  Iceleand     Europe  2019       0
+
+    df3 = df1.symmetric_difference(df2, dataframe_names=["df1", "df2"])
+    print(df3)
+
+       country    continent  year  actual original_dataframe
+    0   Sweden       Europe  2019       2                df1
+    1  Denmark    Not known  2018       3                df1
+    2   Sweden       Europe  2012       2                df2
+    3  Finland  Scandinavia  2018       3                df2
+    ```
     """
     if dataframe_names and len(dataframe_names) != 2:
         raise ValueError("Only two dataframe names")
@@ -121,8 +151,6 @@ def intersection(dataframe1: pd.DataFrame, dataframe2: pd.DataFrame) -> pd.DataF
 
     Does not alter the original DataFrame.
 
-    Syntactic sugar for the pandas dataframe merge method with the parametere "how" passed as "inner".
-
     Parameters
     ----------
     dataframe1 : pd.DataFrame\n
@@ -131,7 +159,7 @@ def intersection(dataframe1: pd.DataFrame, dataframe2: pd.DataFrame) -> pd.DataF
     Returns
     -------
     pandas DataFrame\n
-        The set difference between dataframe1 and dataframe2
+        The set intersection between dataframe1 and dataframe2
 
     Raises
     ------
@@ -173,6 +201,36 @@ def union(dataframe1: pd.DataFrame, dataframe2: pd.DataFrame) -> pd.DataFrame:
     ------
     ValueError\n
         Raises ValueError if the columns in datframe1 and dataframe2 are not identical.
+
+    Example
+    -------
+    ```python
+    import panda as pd
+    import neat_panda
+
+    print(df1)
+
+        country  continent  year  actual
+    0    Sweden     Europe  2018       1
+    1   Denmark  Not known  2018       3
+    2  Iceleand     Europe  2019       0
+
+    print(df2)
+
+        country  continent  year  actual
+    0    Sweden     Europe  2020       1
+    1   Denmark  Not known  2020       3
+
+    df3 = df1.union(df2)
+    print(df3)
+
+        country  continent  year  actual
+    0    Sweden     Europe  2018       1
+    1   Denmark  Not known  2018       3
+    2  Iceleand     Europe  2019       0
+    3    Sweden     Europe  2020       1
+    4   Denmark  Not known  2020       3
+    ```
     """
     if not dataframe1.columns.to_list() == dataframe2.columns.to_list():
         raise ValueError(
