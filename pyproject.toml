@@ -2,8 +2,9 @@
 name = "neat_panda"
 version = "0.9.3"
 readme = "README.md"
-authors = "Henric Sundberg <henric.sundberg@gmail.com>"
-home-page = "https://github.com/htp84/neat_panda"
+authors = ["Henric Sundberg, <henric.sundberg@gmail.com>"]
+description = ""
+homepage = "https://github.com/htp84/neat_panda"
 classifiers = ["Development Status :: 4 - Beta",
                "Intended Audience :: Developers",
                "Topic :: Software Development :: Libraries :: Python Modules",
