@@ -2,7 +2,7 @@
 
 import re
 from collections import Counter
-from typing import Union, List, Dict, Any
+from typing import Union, List, Dict, Any, Optional
 
 import pandas as pd
 import pandas_flavor as pf
@@ -12,7 +12,7 @@ import pandas_flavor as pf
 def clean_column_names(
     object_: Union[List[Union[str, int]], pd.Index, pd.DataFrame],
     convert_duplicates: bool = True,
-    convert_camel_case: bool = False,
+    case_type: Optional[str] = None,
 ) -> Union[List[str], pd.DataFrame]:
     """Clean messy column names. Inspired by the functions make_clean_names and clean_names from
     the R package janitor.
@@ -43,16 +43,12 @@ def clean_column_names(
     """
     if isinstance(object_, (list, pd.Index)):
         columns = _clean_column_names_list(
-            columns=object_,
-            convert_duplicates=convert_duplicates,
-            convert_camel_case=convert_camel_case,
+            columns=object_, convert_duplicates=convert_duplicates, case_type=case_type
         )
         return columns
     elif isinstance(object_, pd.DataFrame):
         df = _clean_column_names_dataframe(
-            df=object_,
-            convert_duplicates=convert_duplicates,
-            convert_camel_case=convert_camel_case,
+            df=object_, convert_duplicates=convert_duplicates, case_type=case_type
         )
         return df
     else:
@@ -64,7 +60,7 @@ def clean_column_names(
 def _clean_column_names_list(
     columns: Union[List[Union[str, int]], pd.Index],
     convert_duplicates: bool = True,
-    convert_camel_case: bool = False,
+    case_type: Optional[str] = None,
 ) -> List[str]:
     """Cleans messy columnames. Written to be a utility function. It is recommended
     to use the clean_columnames function instead.
@@ -96,9 +92,9 @@ def _clean_column_names_list(
     columns = _clean_column_names(
         columns=columns,
         convert_duplicates=convert_duplicates,
-        convert_camel_case=convert_camel_case,
+        case_type=case_type,
         expressions=[
-            r"column.lower()",  # set columnnames to lowercase
+            # r"column.lower()",  # set columnnames to lowercase
             r're.sub(r"\s+", " ", column).strip()',  # replace multiple spaces with one space
             r're.sub(r"\W+", "_", column).strip()',  # replace all non-alphanumeric characters in a string (except underscore) with underscore
             r'column.rstrip("_").lstrip("_")',  # remove leading and lagging underscores
@@ -108,7 +104,7 @@ def _clean_column_names_list(
 
 
 def _clean_column_names_dataframe(
-    df: pd.DataFrame, convert_duplicates: bool = True, convert_camel_case: bool = False
+    df: pd.DataFrame, convert_duplicates: bool = True, case_type: Optional[str] = None
 ) -> pd.DataFrame:
     """Cleans messy columnames of a dataframe. Written to be a utility function. It is recommended
     to use the clean_columnames function instead.
@@ -142,9 +138,7 @@ def _clean_column_names_dataframe(
             f"The passed df is a {type(df)}. It must be a pandas dataframe!"
         )
     df.columns = _clean_column_names_list(
-        columns=df.columns,
-        convert_duplicates=convert_duplicates,
-        convert_camel_case=convert_camel_case,
+        columns=df.columns, convert_duplicates=convert_duplicates, case_type=case_type
     )
     return df
 
@@ -154,7 +148,7 @@ def _clean_column_names(
     custom: Dict[Any, Any] = None,
     expressions: List[str] = None,
     convert_duplicates: bool = True,
-    convert_camel_case: bool = False,
+    case_type: Optional[str] = None,
 ) -> List[str]:
     """Base function for clean_columnames. Can be used for very specific needs.
     ----------
@@ -209,8 +203,8 @@ def _clean_column_names(
     if custom:
         for i, j in custom.items():
             columns = [k.replace(i, j) for k in columns]
-    if convert_camel_case:
-        columns = _camel_to_snake(columns=columns)
+    if case_type:
+        columns = _case_chooser(columns=columns, case=case_type)
     if expressions:
         for reg in expressions:
             columns = [
@@ -221,7 +215,18 @@ def _clean_column_names(
     return columns
 
 
-def _camel_to_snake(columns: List[str]) -> List[str]:
+def _case_chooser(columns, case: str):
+    if case.lower() not in ["camel", "pascal", "snake"]:
+        raise KeyError()
+    if case == "snake":
+        return _to_snake(columns)
+    elif case == "camel":
+        return _to_camel(columns)
+    else:
+        return _to_pascal(columns)
+
+
+def _to_snake(columns: List[str]) -> List[str]:
     """Converts a list of strings with camel case formatting to a list of strings with snake case formatting
 
     Code is based on code from [StackOverflow](https://stackoverflow.com/questions/1175208/elegant-python-function-to-convert-camelcase-to-snake-case)
@@ -229,7 +234,7 @@ def _camel_to_snake(columns: List[str]) -> List[str]:
     Parameters
     ----------
     columns : List[str]
-        A list of strings with camel case formatting
+        A list of strings with camel or pascal case formatting
 
     Returns
     -------
@@ -239,8 +244,8 @@ def _camel_to_snake(columns: List[str]) -> List[str]:
     Example
     -------
     ```python
-    a = ["CountryName", "SubRegion"]
-    b = _camel_to_snake(columns=a)
+    a = ["CountryName", "subRegion"]
+    b = _to_snake(columns=a)
     print(b)
 
     ["country_name", "sub_region"]
@@ -250,6 +255,71 @@ def _camel_to_snake(columns: List[str]) -> List[str]:
     for i in columns:
         i = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", i)
         i = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", i).lower().replace("__", "_")
+        _cols.append(i)
+    return _cols
+
+
+def _to_camel(columns: List[str]) -> List[str]:
+    """Converts a list of strings with pascal or snake case formatting to a list of strings with camel case formatting
+
+    Code is based on code from [StackOverflow](https://stackoverflow.com/questions/19053707/converting-snake-case-to-lower-camel-case-lowercamelcase)
+
+    Parameters
+    ----------
+    columns : List[str]
+        A list of strings with snake or pascal case formatting
+
+    Returns
+    -------
+    List
+        A list of strings with camel case formatting
+
+    Example
+    -------
+    ```python
+    a = ["CountryName", "SubRegion"]
+    b = _to_camel(columns=a)
+    print(b)
+
+    ["countryName", "subRegion"]
+    ```
+    """
+    _cols = []
+    for i in columns:
+        i = re.sub(r"_([a-zA-Z0-9])", lambda x: x.group(1).upper(), i)
+        _cols.append(i)
+    return _cols
+
+
+def _to_pascal(columns: List[str]) -> List[str]:
+    """Converts a list of strings with camel or snake case formatting to a list of strings with pascal case formatting
+
+    Code is based on code from [StackOverflow](https://stackoverflow.com/questions/19053707/converting-snake-case-to-lower-camel-case-lowercamelcase)
+
+    Parameters
+    ----------
+    columns : List[str]
+        A list of strings with snake or camel case formatting
+
+    Returns
+    -------
+    List
+        A list of strings with pascal case formatting
+
+    Example
+    -------
+    ```python
+    a = ["country_name", "subRegion"]
+    b = _to_pascal(columns=a)
+    print(b)
+
+    ["CountryName", "SubRegion"]
+    ```
+    """
+    _cols = []
+    for i in columns:
+        i = re.sub("_([a-zA-Z0-9])", lambda x: x.group(1).upper(), i)
+        i = i[0].upper() + i[1:]
         _cols.append(i)
     return _cols
 

@@ -197,7 +197,9 @@ class TestsCleanColumns:
         "1",
     ]
 
-    actual_camel_case_names = ["countryName", "SubRegion", "IceHockey"]
+    actual_camel_case_names = ["countryName", "subRegion", "iceHockey"]
+
+    actual_pascal_case_names = ["CountryName", "SubRegion", "IceHockey"]
 
     faulty_camel_case_names = ["countryNaMe", "SUbRegion", "ICeHOckey"]
 
@@ -216,17 +218,27 @@ class TestsCleanColumns:
         assert isinstance(_clean_column_names(df.columns), list)
 
     def test_assert_correct_result_basic(self, old=nasty, new=clean):
-        assert clean_column_names(old, convert_camel_case=True) == new
+        assert clean_column_names(old, case_type="snake") == new
 
     def test_assert_correct_result_camel_case1(
         self, old=actual_camel_case_names, new=snake_case_names
     ):
-        assert clean_column_names(old, convert_camel_case=True) == new
+        assert clean_column_names(old, case_type="snake") == new
+
+    def test_assert_correct_result_to_camelcase(
+        self, old=snake_case_names, new=actual_camel_case_names
+    ):
+        assert clean_column_names(old, case_type="camel") == new
+
+    def test_assert_correct_result_to_pascalcase(
+        self, old=snake_case_names, new=actual_pascal_case_names
+    ):
+        assert clean_column_names(old, case_type="pascal") == new
 
     def test_assert_errorenous_result_camel_case(
         self, old=faulty_camel_case_names, new=snake_case_names
     ):
-        assert clean_column_names(old, convert_camel_case=True) != new
+        assert clean_column_names(old, case_type="snake") != new
 
     def test_assert_correct_result_custom(self, old=nasty, new=clean):
         cols3 = _clean_column_names(
@@ -238,7 +250,7 @@ class TestsCleanColumns:
                 r'column.rstrip("_").lstrip("_")',
             ],
             convert_duplicates=True,
-            convert_camel_case=True,
+            case_type="snake",
         )
         assert cols3 == new
 
@@ -248,7 +260,7 @@ class TestsCleanColumns:
         c = _clean_column_names(
             a,
             custom={"-": "", "?": "!"},
-            convert_camel_case=True,  # the expression 'column.lower()' is not needed since convert_camel_case invokes it
+            case_type="snake",  # the expression 'column.lower()' is not needed since convert_camel_case invokes it
             convert_duplicates=True,
         )
         assert c == b
@@ -259,7 +271,6 @@ class TestsCleanColumns:
         c = _clean_column_names(
             a,
             custom={"-": "", "?": "!"},
-            convert_camel_case=False,
             convert_duplicates=True,
             expressions=["column.lower()"],
         )
@@ -270,7 +281,7 @@ class TestsCleanColumns:
         clean_cols = df.columns.tolist()
         df.columns = messy_cols
         df = clean_column_names(
-            df, convert_camel_case=False
+            df
         )  # convert camelcase can lead to unexpected behaviour when large and
         # small letters ar mixed and they are not camelcase. set camelcase
         # default as false. eg year becomes y_ear
@@ -280,8 +291,8 @@ class TestsCleanColumns:
         messy_cols = ["country    ", "continent£", "@@year   ", "actual"]
         clean_cols = df.columns.tolist()
         df.columns = messy_cols
-        df = df.clean_column_names(
-            convert_camel_case=False
+        df = (
+            df.clean_column_names()
         )  # convert camelcase can lead to unexpected behaviour when large
         # and small letters ar mixed and they are not camelcase.
         assert df.columns.tolist() == clean_cols
@@ -324,7 +335,7 @@ class TestSetOperations:
     def test_basic_intersection(self, df=df):
         df2 = pd.DataFrame(
             data={
-                "country": ["Sweden", "Denmark", "Iceleand"],
+                "country": ["Sweden", "Denmark", "Iceland"],
                 "continent": ["Europe", "Not known", "Europe"],
                 "year": [2018, 2018, np.nan],
                 "actual": [1, 3, 0],
