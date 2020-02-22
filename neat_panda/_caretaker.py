@@ -12,7 +12,7 @@ import pandas_flavor as pf
 def clean_column_names(
     object_: Union[List[Union[str, int]], pd.Index, pd.DataFrame],
     convert_duplicates: bool = True,
-    case_type: Optional[str] = None,
+    case_type: Optional[str] = "snake",
 ) -> Union[List[str], pd.DataFrame]:
     """Clean messy column names. Inspired by the functions make_clean_names and clean_names from
     the R package janitor.
@@ -60,10 +60,10 @@ def clean_column_names(
 def _clean_column_names_list(
     columns: Union[List[Union[str, int]], pd.Index],
     convert_duplicates: bool = True,
-    case_type: Optional[str] = None,
+    case_type: Optional[str] = "snake",
 ) -> List[str]:
     """Cleans messy columnames. Written to be a utility function. It is recommended
-    to use the clean_columnames function instead.
+    to use the clean_colum_names function instead.
 
     Regex that replace multiple spaces with one space i based on the user Nasir's answer at
     [StackOverflow](https://stackoverflow.com/questions/1546226/simple-way-to-remove-multiple-spaces-in-a-string)
@@ -78,11 +78,13 @@ def _clean_column_names_list(
     convert_duplicates : bool, optional\n
         If True, unique columnnames are created. E.g. if there are two columns, country and Country,
         this option set the columnnames to country1 and country2. By default True
-    convert_camel_case : bool, optional\n
-        Converts camel case to snake case. E.g the columnname SubRegion is changed to sub_region.
-        However, it only works for actual camel case names, like the example above. If instead the original
-        columname where SUbRegion the resulting converted name would be s_ub_region. Hence, use this
-        option with caution. By default False
+    case_type : str, optional\n
+        Converts one case type to another. E.g if set to "snake" ("s") SubRegion is changed to sub_region,
+        "camel" ("c") changes sub_region to subRegion and "pascal" ("p") changes sub_region to SubRegion.
+        However, this options should only be used when transforming one case type to another case type,
+        like the example above. If instead the original columname where SUbRegion the resulting converted name
+        would be s_ub_region. Hence, use this
+        option with caution. By default None
 
     Returns
     -------
@@ -93,18 +95,24 @@ def _clean_column_names_list(
         columns=columns,
         convert_duplicates=convert_duplicates,
         case_type=case_type,
-        expressions=[
-            # r"column.lower()",  # set columnnames to lowercase
-            r're.sub(r"\s+", " ", column).strip()',  # replace multiple spaces with one space
-            r're.sub(r"\W+", "_", column).strip()',  # replace all non-alphanumeric characters in a string (except underscore) with underscore
-            r'column.rstrip("_").lstrip("_")',  # remove leading and lagging underscores
-        ],
+        expressions=expression_setter(case_type=case_type),
     )
     return columns
 
 
+def expression_setter(case_type):
+    expressions = [
+        r're.sub(r"\s+", " ", column).strip()',  # replace multiple spaces with one space
+        r're.sub(r"\W+", "_", column).strip()',  # replace all non-alphanumeric characters in a string (except underscore) with underscore
+        r'column.rstrip("_").lstrip("_")',  # remove leading and lagging underscores
+    ]
+    return expressions
+
+
 def _clean_column_names_dataframe(
-    df: pd.DataFrame, convert_duplicates: bool = True, case_type: Optional[str] = None
+    df: pd.DataFrame,
+    convert_duplicates: bool = True,
+    case_type: Optional[str] = "snake",
 ) -> pd.DataFrame:
     """Cleans messy columnames of a dataframe. Written to be a utility function. It is recommended
     to use the clean_columnames function instead.
@@ -148,7 +156,7 @@ def _clean_column_names(
     custom: Dict[Any, Any] = None,
     expressions: List[str] = None,
     convert_duplicates: bool = True,
-    case_type: Optional[str] = None,
+    case_type: Optional[str] = "snake",
 ) -> List[str]:
     """Base function for clean_columnames. Can be used for very specific needs.
     ----------
@@ -216,11 +224,11 @@ def _clean_column_names(
 
 
 def _case_chooser(columns, case: str):
-    if case.lower() not in ["camel", "pascal", "snake"]:
+    if case.lower() not in ["camel", "pascal", "snake", "c", "p", "s"]:
         raise KeyError()
-    if case == "snake":
+    if case[0].lower() == "s":
         return _to_snake(columns)
-    elif case == "camel":
+    elif case[0].lower() == "c":
         return _to_camel(columns)
     else:
         return _to_pascal(columns)
@@ -286,8 +294,13 @@ def _to_camel(columns: List[str]) -> List[str]:
     """
     _cols = []
     for i in columns:
+        i = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", i)
+        i = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", i).lower().replace("__", "_")
         i = re.sub(r"_([a-zA-Z0-9])", lambda x: x.group(1).upper(), i)
         _cols.append(i)
+    # testa så den kan konvertar från camel to pascal!
+    # Om tex [] omsluter texten så funmkar inte camle och pascal om inte det görs tiöö snake först
+    # om det är stora bokstäver så funkar inte camel och pascal
     return _cols
 
 
@@ -316,12 +329,7 @@ def _to_pascal(columns: List[str]) -> List[str]:
     ["CountryName", "SubRegion"]
     ```
     """
-    _cols = []
-    for i in columns:
-        i = re.sub("_([a-zA-Z0-9])", lambda x: x.group(1).upper(), i)
-        i = i[0].upper() + i[1:]
-        _cols.append(i)
-    return _cols
+    return [i[0].upper() + i[1:] for i in _to_camel(columns)]
 
 
 def _convert_duplicates(columns: List[str]) -> List[str]:

@@ -32,7 +32,7 @@ df = pd.DataFrame(
 
 
 def test_version():
-    assert "0.9.3" == __version__ == _get_version_from_toml("pyproject.toml")
+    assert "0.9.4.1-dev" == __version__ == _get_version_from_toml("pyproject.toml")
 
 
 class TestsSpread:
@@ -235,6 +235,20 @@ class TestsCleanColumns:
     ):
         assert clean_column_names(old, case_type="pascal") == new
 
+    def test_assert_correct_result_to_camelcase_large_letters(
+        self, old=snake_case_names, new=actual_camel_case_names
+    ):
+        old = clean_column_names(old, case_type="snake")
+        old = [i.upper() for i in old]
+        assert clean_column_names(old, case_type="camel") == new
+
+    def test_assert_correct_result_to_pascalcase_large_letters(
+        self, old=snake_case_names, new=actual_pascal_case_names
+    ):
+        old = clean_column_names(old, case_type="snake")
+        old = [i.upper() for i in old]
+        assert clean_column_names(old, case_type="pascal") == new
+
     def test_assert_errorenous_result_camel_case(
         self, old=faulty_camel_case_names, new=snake_case_names
     ):
@@ -267,13 +281,52 @@ class TestsCleanColumns:
 
     def test_assert_correct_result_custom3(self):
         a = ["-Hello-", "Goodbye?", "HelloGoodbye", "Hello_Goodbye"]
-        b = ["hello", "goodbye!", "hellogoodbye", "hello_goodbye"]
+        b = ["hello", "goodbye!", "hello_goodbye", "hello_goodbye"]
+        c = _clean_column_names(
+            a,
+            custom={"-": "", "?": "!"},
+            convert_duplicates=False,
+            expressions=["column.lower()"],
+        )
+        assert c == b
+
+    def test_assert_correct_result_custom4(self):
+        a = ["-Hello-", "Goodbye?", "HelloGoodbye", "Hello_Goodbye"]
+        b = ["hello", "goodbye!", "hello_goodbye1", "hello_goodbye2"]
         c = _clean_column_names(
             a,
             custom={"-": "", "?": "!"},
             convert_duplicates=True,
             expressions=["column.lower()"],
         )
+        assert c == b
+
+    def test_assert_correct_result_custom5(self):
+        a = ["-Hello-", "Goodbye?", "HelloGoodbye", "Hello_Goodbye"]
+        b = ["Hello", "Goodbye!", "Hello_Goodbye1", "Hello_Goodbye2"]
+        c = _clean_column_names(
+            a,
+            custom={"-": "", "?": "!"},
+            convert_duplicates=True,
+            expressions=["column.title()"],
+        )
+        assert c == b
+
+    def test_assert_correct_result_custom6(self):
+        a = ["-Hello-", "Goodbye?", "HelloGoodbye", "Hello_Goodbye"]
+        b = ["Hello", "Goodbye!", "Hello_goodbye1", "Hello_goodbye2"]
+        c = _clean_column_names(
+            a,
+            custom={"-": "", "?": "!"},
+            convert_duplicates=True,
+            expressions=["column.capitalize()"],
+        )
+        assert c == b
+
+    def test_assert_correct_result_custom7(self):
+        a = ["SUbRegion", "helloHOwAReYou?"]  # hur kan denna göras till snake?
+        b = ["sub_region", "hello_how_are_you"]
+        c = clean_column_names(a, case_type="snake", convert_duplicates=False)
         assert c == b
 
     def test_assert_correct_result_dataframe(self, df=df):
