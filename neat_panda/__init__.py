@@ -4,7 +4,7 @@
 
 __author__ = """Henric Sundberg"""
 __email__ = "henric.sundberg@gmail.com"
-__version__ = "0.9.4.1-dev"
+__version__ = "0.9.5.0"
 
 from ._tidy import spread, gather
 

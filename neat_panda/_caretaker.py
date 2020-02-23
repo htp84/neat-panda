@@ -174,19 +174,19 @@ class CleanColumnNames:
     ```
     """
 
-    SNAKE = [
-        r're.sub(r"(.)([A-Z][a-z]+)", r"\1\2", column)',
-        r're.sub(r"([a-z0-9])([A-Z])", r"\1_\2", column).lower().replace("__", "_")',
-    ]
-    CAMEL = SNAKE + [r're.sub(r"_([a-zA-Z0-9])", lambda x: x.group(1).upper(), column)']
-    PASCAL = CAMEL + [r"column[0].upper() + column[1:]"]
-
     object_: Union[List[Union[str, int]], pd.Index, pd.DataFrame]
     case_type: str = "snake"
     basic_cleaning: bool = True
     convert_duplicates: bool = True
     custom_transformation: Optional[Dict[str, str]] = None
     custom_expressions: Optional[List[str]] = None
+
+    SNAKE = [
+        r're.sub(r"(.)([A-Z][a-z]+)", r"\1\2", column)',
+        r're.sub(r"([a-z0-9])([A-Z])", r"\1_\2", column).lower().replace("__", "_")',
+    ]
+    CAMEL = SNAKE + [r're.sub(r"_([a-zA-Z0-9])", lambda x: x.group(1).upper(), column)']
+    PASCAL = CAMEL + [r"column[0].upper() + column[1:]"]
 
     def clean_column_names(self) -> Union[List[str], pd.DataFrame]:
         """Clean messy column names. Inspired by the functions make_clean_names and clean_names from
