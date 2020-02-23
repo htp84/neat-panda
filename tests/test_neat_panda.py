@@ -11,7 +11,6 @@ from neat_panda import (
     spread,
     gather,
     clean_column_names,
-    _clean_column_names,
     difference,
     intersection,
     symmetric_difference,
@@ -212,10 +211,8 @@ class TestsCleanColumns:
 
     def test_assert_type(self, cols=clean, df=df):
         assert isinstance(clean_column_names(cols), list)
-        assert isinstance(_clean_column_names(cols), list)
         assert isinstance(clean_column_names(df), pd.DataFrame)
         assert isinstance(clean_column_names(df.columns), list)
-        assert isinstance(_clean_column_names(df.columns), list)
 
     def test_assert_correct_result_basic(self, old=nasty, new=clean):
         assert clean_column_names(old, case_type="snake") == new
@@ -255,10 +252,9 @@ class TestsCleanColumns:
         assert clean_column_names(old, case_type="snake") != new
 
     def test_assert_correct_result_custom(self, old=nasty, new=clean):
-        cols3 = _clean_column_names(
+        cols3 = clean_column_names(
             old,
-            expressions=[
-                r"column.lower()",
+            custom_expressions=[
                 r're.sub(r"\s+", " ", column).strip()',
                 r're.sub(r"\W+", "_", column).strip()',
                 r'column.rstrip("_").lstrip("_")',
@@ -270,74 +266,70 @@ class TestsCleanColumns:
 
     def test_assert_correct_result_custom2(self):
         a = ["-Hello-", "Goodbye?", "HelloGoodbye", "Hello_Goodbye"]
-        b = ["hello", "goodbye!", "hello_goodbye1", "hello_goodbye2"]
-        c = _clean_column_names(
+        b = ["#hello#", "goodbye!", "hello_goodbye1", "hello_goodbye2"]
+        c = clean_column_names(
             a,
-            custom={"-": "", "?": "!"},
-            case_type="snake",  # the expression 'column.lower()' is not needed since convert_camel_case invokes it
+            basic_cleaning=False,
+            custom_transformation={"-": "#", "?": "!"},
+            case_type="snake",
             convert_duplicates=True,
         )
         assert c == b
 
     def test_assert_correct_result_custom3(self):
         a = ["-Hello-", "Goodbye?", "HelloGoodbye", "Hello_Goodbye"]
-        b = ["hello", "goodbye!", "hello_goodbye", "hello_goodbye"]
-        c = _clean_column_names(
+        b = ["#hello#", "goodbye!", "hellogoodbye", "hello_goodbye"]
+        c = clean_column_names(
             a,
-            custom={"-": "", "?": "!"},
+            basic_cleaning=False,
+            custom_transformation={"-": "#", "?": "!"},
             convert_duplicates=False,
-            expressions=["column.lower()"],
+            custom_expressions=["column.lower()"],
         )
         assert c == b
 
     def test_assert_correct_result_custom4(self):
         a = ["-Hello-", "Goodbye?", "HelloGoodbye", "Hello_Goodbye"]
         b = ["hello", "goodbye!", "hello_goodbye1", "hello_goodbye2"]
-        c = _clean_column_names(
+        c = clean_column_names(
             a,
-            custom={"-": "", "?": "!"},
+            basic_cleaning=False,
+            custom_transformation={"-": "", "?": "!"},
             convert_duplicates=True,
-            expressions=["column.lower()"],
         )
         assert c == b
 
     def test_assert_correct_result_custom5(self):
-        a = ["-Hello-", "Goodbye?", "HelloGoodbye", "Hello_Goodbye"]
+        a = ["-Hello-", "Goodbye?", "Hello_goodbye", "Hello_Goodbye"]
         b = ["Hello", "Goodbye!", "Hello_Goodbye1", "Hello_Goodbye2"]
-        c = _clean_column_names(
+        c = clean_column_names(
             a,
-            custom={"-": "", "?": "!"},
+            basic_cleaning=False,
+            custom_transformation={"-": "", "?": "!"},
             convert_duplicates=True,
-            expressions=["column.title()"],
+            custom_expressions=["column.title()"],
+            case_type=None,
         )
         assert c == b
 
     def test_assert_correct_result_custom6(self):
-        a = ["-Hello-", "Goodbye?", "HelloGoodbye", "Hello_Goodbye"]
+        a = ["-Hello-", "Goodbye?", "hello_goodbye", "Hello_Goodbye"]
         b = ["Hello", "Goodbye!", "Hello_goodbye1", "Hello_goodbye2"]
-        c = _clean_column_names(
+        c = clean_column_names(
             a,
-            custom={"-": "", "?": "!"},
+            basic_cleaning=False,
+            custom_transformation={"-": "", "?": "!"},
             convert_duplicates=True,
-            expressions=["column.capitalize()"],
+            custom_expressions=["column.capitalize()"],
+            case_type=None,
         )
-        assert c == b
-
-    def test_assert_correct_result_custom7(self):
-        a = ["SUbRegion", "helloHOwAReYou?"]  # hur kan denna göras till snake?
-        b = ["sub_region", "hello_how_are_you"]
-        c = clean_column_names(a, case_type="snake", convert_duplicates=False)
         assert c == b
 
     def test_assert_correct_result_dataframe(self, df=df):
         messy_cols = ["country    ", "continent£", "@@year   ", "actual"]
         clean_cols = df.columns.tolist()
         df.columns = messy_cols
-        df = clean_column_names(
-            df
-        )  # convert camelcase can lead to unexpected behaviour when large and
-        # small letters ar mixed and they are not camelcase. set camelcase
-        # default as false. eg year becomes y_ear
+        df = clean_column_names(df)
         assert df.columns.tolist() == clean_cols
 
     def test_assert_correct_result_dataframe_method(self, df=df):
