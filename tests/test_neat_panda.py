@@ -333,6 +333,7 @@ class TestsCleanColumns:
         assert df.columns.tolist() == clean_cols
 
     def test_assert_correct_result_dataframe_method(self, df=df):
+        df = df.copy()
         messy_cols = ["country    ", "continent£", "@@year   ", "actual"]
         clean_cols = df.columns.tolist()
         df.columns = messy_cols
@@ -341,6 +342,20 @@ class TestsCleanColumns:
         )  # convert camelcase can lead to unexpected behaviour when large
         # and small letters ar mixed and they are not camelcase.
         assert df.columns.tolist() == clean_cols
+
+    def test_assert_correct_result_dataframe_method2(self, df=df):
+        df = df.copy()
+        messy_cols = ["CountryName", "Continent", "yearNo", "ACTUAL"]
+        clean_cols_snake = ["country_name", "continent", "year_no", "actual"]
+        clean_cols_camel = ["countryName", "continent", "yearNo", "actual"]
+        clean_cols_pascal = ["CountryName", "Continent", "YearNo", "Actual"]
+        df.columns = messy_cols
+        df_snake = df.clean_column_names(case_type="snake").copy()
+        df_camel = df.clean_column_names(case_type="camel").copy()
+        df_pascal = df.clean_column_names(case_type="pascal").copy()
+        assert df_snake.columns.tolist() == clean_cols_snake
+        assert df_camel.columns.tolist() == clean_cols_camel
+        assert df_pascal.columns.tolist() == clean_cols_pascal
 
 
 class TestSetOperations:

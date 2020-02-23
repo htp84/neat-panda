@@ -21,7 +21,7 @@ def clean_column_names(
     """Clean messy column names. Inspired by the functions make_clean_names and clean_names from
     the R package janitor.
 
-    Does not alter the original DataFrame.
+    Alters the columns of the original DataFrame. Use copy [e.g. df.clean_column_names().copy()] if this behavior is not desired.
 
     Parameters
     ----------
@@ -85,6 +85,94 @@ def clean_column_names(
 
 @dataclass
 class CleanColumnNames:
+    """Clean messy column names. Inspired by the functions make_clean_names and clean_names from
+    the R package janitor.
+
+    snake_case: Code is based on code from [StackOverflow](https://stackoverflow.com/questions/1175208/elegant-python-function-to-convert-camelcase-to-snake-case)
+
+    camelCase: Code is based on code from [StackOverflow](https://stackoverflow.com/questions/19053707/converting-snake-case-to-lower-camel-case-lowercamelcase)
+
+    Parameters
+    ----------
+    object_: Union[List[Union[str, int]], pd.Index, pd.DataFrame]\n
+        Messy strings in a list, pandas index or a pandas dataframe with messy columnames
+    case_type: str\n
+        Which case type to use, the alternatives are: snake (s) [case_type], camel (c) [caseType], pascal (p) [CaseType]. Not case sensitive.
+        Equals 'snake' by default.
+    basic_cleaning: bool\n
+        Performs basic cleaning of the strings if supplied. Performs three actions:
+            1. Replaces multiple spaces with one space\n
+            2. Replaces all non-alphanumeric characters in a string (except underscore) with underscore\n
+            3. Removes leading and lagging underscores
+        By default True.\n
+    convert_duplicates : bool, optional\n
+        If True, unique columnnames are created. E.g. if there are two columns, country and Country (and the case type is 'snake'),
+        this option set the columnnames to country1 and country2. By default True.\n
+    custom_transformation : Dict[Any, Any], optional\n
+        If you want to replace one specific character with another specific character.
+        E.g if you want exclamationpoints to be replaced with dollarsigns, pass the following:
+        /{'!':'$'/}. Use with caution if the custom_expressions parameter is used since the custom_expressions parameter
+        is evaluated after the custom_transformation parameter.
+        Cannot be used together with basic_cleaning, i.e. to use custom transformations basic_cleaning must be set to False.\n
+        By default None
+    custom_expressions : List[str], optional\n
+        In this parameter any string method or regex can be passed. They must be passed as a string
+        with column as object. E.g if you want, as in the example with in the custom_transformation parameter, wants
+        to exclamation point to be replaced with dollarsign, pass the following:
+         ["column.replace('!', '$')"]
+        or you want capitalize the columns:
+         ["column.capitalize()"]
+        or you want to replace multiple spaces with one space:
+         [r're.sub(r"\s+", " ", column).strip()'] # noqa: W605
+        or if you want to do all of the above:
+        ['column.replace("!", "$")',
+         'column.capitalize()',
+         r're.sub(r"\s+", " ", column).strip()' # noqa: W605
+        ]
+        By default None
+    Returns
+    -------
+    List[str] or a pandas DataFrame\n
+        A list of cleaned columnames or a dataframe with cleaned columnames
+
+    Raises
+    ------
+    TypeError\n
+        Raises TypeError if the passed object_ is not a list, pandas index or a pandas dataframe
+    KeyError\n
+        Raises KeyError if both basic_cleaning and custom_transformations is used.
+
+    Example
+    -------
+    ```python
+    # Pandas
+    import pandas as pd
+    import neat_panda
+
+    df = pd.DataFrame(
+    data={
+        "CountryName": ["Sweden", "Sweden", "Denmark"],
+        "Continent": ["Europe", "Europe", "Not known"],
+        "yearNo": [2018, 2019, 2018],
+        "ACTUAL": [1, 2, 3],
+        }
+    )
+    print(df.columns.to_list()) # ['CountryName', 'Continent', 'yearNo', 'ACTUAL']
+    df = df.clean_column_names()
+    print(df.columns.to_list()) # ['CountryName', 'Continent', 'yearNo', 'ACTUAL']
+
+
+    # Cleaning of list
+    from neat_panda import clean_column_names
+    # snake_case
+    a = ["CountryName", "subRegion"]
+    b = clean_column_names(columns=a) # ["country_name", "sub_region"]
+    # camelCase
+    c = clean_column_names(columns=b, case_type="camel") # ["countryName", "subRegion"]
+    # PascalCase
+    d = clean_column_names(columns=b, case_type="pascal") # ["CountryName", "SubRegion"]
+    ```
+    """
 
     SNAKE = [
         r're.sub(r"(.)([A-Z][a-z]+)", r"\1\2", column)',
@@ -103,20 +191,6 @@ class CleanColumnNames:
     def clean_column_names(self) -> Union[List[str], pd.DataFrame]:
         """Clean messy column names. Inspired by the functions make_clean_names and clean_names from
         the R package janitor.
-
-        Does not alter the original DataFrame.
-
-        Parameters
-        ----------
-        object_ : Union[List[Union[str, int]], pd.Index, pd.DataFrame]\n
-            Messy columnnames in a list or as a pandas index or a dataframe with messy columnames
-        convert_duplicates : bool, optional\n
-            If True, unique columnnames are created. E.g. if there are two columns, country and Country,
-            this option set the columnnames to country1 and country2. By default True
-        convert_camel_case : bool, optional\n
-            Converts camel case to snake case. E.g the columnname SubRegion is changed to sub_region.
-            However, it only works for actual camel case names, like the example above.
-            If instead the original columname where SUbRegion the resulting converted name would be s_ub_region. Hence, use this option with caution. By default False
 
         Returns
         -------
@@ -224,110 +298,6 @@ class CleanColumnNames:
         if self.convert_duplicates:
             columns = self._convert_duplicates(columns=columns)
         return columns
-
-    def _case_chooser(self, columns):
-        if self.case_type.lower() not in ["camel", "pascal", "snake", "c", "p", "s"]:
-            raise KeyError()
-        if self.case_type[0].lower() == "s":
-            return self._to_snake(columns)
-        elif self.case_type[0].lower() == "c":
-            return self._to_camel(columns)
-        else:
-            return self._to_pascal(columns)
-
-    @staticmethod
-    def _to_snake(columns: List[str]) -> List[str]:
-        """Converts a list of strings with camel case formatting to a list of strings with snake case formatting
-
-        Code is based on code from [StackOverflow](https://stackoverflow.com/questions/1175208/elegant-python-function-to-convert-camelcase-to-snake-case)
-
-        Parameters
-        ----------
-        columns : List[str]
-            A list of strings with camel or pascal case formatting
-
-        Returns
-        -------
-        List
-            A list of strings with snake case formatting
-
-        Example
-        -------
-        ```python
-        a = ["CountryName", "subRegion"]
-        b = _to_snake(columns=a)
-        print(b)
-
-        ["country_name", "sub_region"]
-        ```
-        """
-        _cols = []
-        for c in columns:
-            c = re.sub(r"(.)([A-Z][a-z]+)", r"\1\2", c)
-            c = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", c).lower().replace("__", "_")
-            _cols.append(c)
-        return _cols
-
-    @staticmethod
-    def _to_camel(columns: List[str]) -> List[str]:
-        """Converts a list of strings with pascal or snake case formatting to a list of strings with camel case formatting
-
-        Code is based on code from [StackOverflow](https://stackoverflow.com/questions/19053707/converting-snake-case-to-lower-camel-case-lowercamelcase)
-
-        Parameters
-        ----------
-        columns : List[str]
-            A list of strings with snake or pascal case formatting
-
-        Returns
-        -------
-        List
-            A list of strings with camel case formatting
-
-        Example
-        -------
-        ```python
-        a = ["CountryName", "SubRegion"]
-        b = _to_camel(columns=a)
-        print(b)
-
-        ["countryName", "subRegion"]
-        ```
-        """
-        _cols = []
-        for i in columns:
-            i = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", i)
-            i = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", i).lower().replace("__", "_")
-            i = re.sub(r"_([a-zA-Z0-9])", lambda x: x.group(1).upper(), i)
-            _cols.append(i)
-        return _cols
-
-    def _to_pascal(self, columns: List[str]) -> List[str]:
-        """Converts a list of strings with camel or snake case formatting to a list of strings with pascal case formatting
-
-        Code is based on code from [StackOverflow](https://stackoverflow.com/questions/19053707/converting-snake-case-to-lower-camel-case-lowercamelcase)
-
-        Parameters
-        ----------
-        columns : List[str]
-            A list of strings with snake or camel case formatting
-
-        Returns
-        -------
-        List
-            A list of strings with pascal case formatting
-
-        Example
-        -------
-        ```python
-        a = ["country_name", "subRegion"]
-        b = _to_pascal(columns=a)
-        print(b)
-
-        ["CountryName", "SubRegion"]
-        ```
-        """
-        return [i[0].upper() + i[1:] for i in self._to_camel(columns)]
 
     def _expressions_case_setter(self):
         if self.case_type.lower() not in ["camel", "pascal", "snake", "c", "p", "s"]:
