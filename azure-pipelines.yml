@@ -5,8 +5,6 @@ jobs:
   - job: linux
     strategy:
       matrix:
-        py36:
-          python.version: "3.6"
         py37:
           python.version: "3.7"
         py38:
@@ -50,8 +48,6 @@ jobs:
       vmImage: macOS-10.14
     strategy:
       matrix:
-        Python36:
-          python.version: '3.6'
         Python37:
           python.version: '3.7'
         Python38:
@@ -80,8 +76,6 @@ jobs:
       vmImage: vs2017-win2016
     strategy:
       matrix:
-        Python36:
-          python.version: '3.6'
         Python37:
           python.version: '3.7'
         Python38:

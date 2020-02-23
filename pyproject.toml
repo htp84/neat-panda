@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "neat_panda"
-version = "0.9.5.0"
+version = "0.9.5.1"
 readme = "README.md"
 authors = ["Henric Sundberg, <henric.sundberg@gmail.com>"]
 description = ""
@@ -10,7 +10,6 @@ classifiers = ["Development Status :: 4 - Beta",
                "Topic :: Software Development :: Libraries :: Python Modules",
                "License :: OSI Approved :: MIT License",
                "Natural Language :: English",
-               "Programming Language :: Python :: 3.6",
                "Programming Language :: Python :: 3.7",
                "Programming Language :: Python :: 3.8",
     ]
