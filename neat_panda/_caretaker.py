@@ -206,16 +206,14 @@ class CleanColumnNames:
             raise KeyError(
                 "Both basic_cleaning and custom_transformation is set. This is not aloud. Choose one!"
             )
-        if isinstance(self.object_, (list, pd.Index)):
-            columns = self._clean_column_names_list()
-            return columns
-        elif isinstance(self.object_, pd.DataFrame):
-            df = self._clean_column_names_dataframe()
-            return df
-        else:
+        if not isinstance(self.object_, (list, pd.Index, pd.DataFrame)):
             raise TypeError(
                 f"The passed object_ is a {type(self.object_)}. It must be a list, pandas index or a pandas dataframe!"
             )
+        if not isinstance(self.object_, pd.DataFrame):
+            return self._clean_column_names_list()
+        else:
+            return self._clean_column_names_dataframe()
 
     def _clean_column_names_list(self) -> List[str]:
         """Cleans messy columnames. Written to be a utility function.
@@ -225,18 +223,15 @@ class CleanColumnNames:
         List[str]\n
             Cleaned columnnames
         """
-        columns = self.object_
         if self.basic_cleaning:
-            columns = self._basic_cleaning(columns=columns)
-        columns = self._clean_column_names(columns)
-        return columns
+            self.object_ = self._basic_cleaning(columns=self.object_)
+        self.object_ = self._clean_column_names(self.object_)
+        return self.object_
 
     def _basic_cleaning(self, columns) -> List[str]:
-        for reg in self._basic_cleaning_expression():
-            columns = [
-                eval(reg, {}, {"column": column, "re": re}) for column in columns
-            ]
-        return columns
+        return self._expressions_eval(
+            columns=columns, expressions=self._basic_cleaning_expression()
+        )
 
     def _clean_column_names_dataframe(self) -> pd.DataFrame:
         """Cleans messy columnames of a dataframe. Written to be a utility function. It is recommended
@@ -258,8 +253,9 @@ class CleanColumnNames:
             raise TypeError(
                 f"The passed df is a {type(self.object_)}. It must be a pandas dataframe!"
             )
-        self.object_.columns = self._clean_column_names_list()
-        return self.object_
+        df = self.object_.copy()
+        df.columns = self._clean_column_names_list()
+        return df
 
     def _clean_column_names(self, columns) -> List[str]:
         """Base function for clean_columnames. Can be used for very specific needs.
@@ -277,9 +273,9 @@ class CleanColumnNames:
         TypeError\n
             If passed column object is not a list or a pandas index TypeError is raised
         """
-        if not isinstance(columns, (list, pd.Index)):
+        if not isinstance(columns, (list, pd.Index, pd.DataFrame)):
             raise TypeError(
-                f"The passed columns is a {type(columns)}. It must be a list or a pandas index!"
+                f"The passed columns is a {type(columns)}. It must be a list, pandas index or a pandas dataframe!"
             )
         if type(columns) == pd.Index:
             columns = columns.to_list()  # type: ignore
@@ -292,7 +288,6 @@ class CleanColumnNames:
                 columns=columns, expressions=self.custom_expressions
             )
         if self.case_type:
-            # columns = self._case_chooser(columns=columns)
             _expressions = self._expressions_case_setter()
             columns = self._expressions_eval(columns=columns, expressions=_expressions)
         if self.convert_duplicates:
