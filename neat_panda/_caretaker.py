@@ -12,7 +12,7 @@ import pandas_flavor as pf
 @pf.register_dataframe_method
 def clean_column_names(
     object_: Union[List[Union[str, int]], pd.Index, pd.DataFrame],
-    case_type: str = "snake",
+    case: str = "snake",
     basic_cleaning: bool = True,
     convert_duplicates: bool = True,
     custom_transformation: Optional[Dict[str, str]] = None,
@@ -21,14 +21,15 @@ def clean_column_names(
     """Clean messy column names. Inspired by the functions make_clean_names and clean_names from
     the R package janitor.
 
-    Alters the columns of the original DataFrame. Use copy [e.g. df.clean_column_names().copy()] if this behavior is not desired.
+    Do not alter the columns of the original DataFrame, i.e. to change the column names of the dataframe df 'df=df.clean_column_names()'
+    should be used.
 
     Parameters
     ----------
     object_: Union[List[Union[str, int]], pd.Index, pd.DataFrame]\n
         Messy strings in a list, pandas index or a pandas dataframe with messy columnames
-    case_type: str\n
-        Which case type to use, the alternatives are: snake (s) [case_type], camel (c) [caseType], pascal (p) [CaseType]. Not case sensitive.
+    case: str\n
+        Which case type to use, the alternatives are: snake (s) [column_name], camel (c) [columnName], pascal (p) [ColumnName]. Not case sensitive.
         Equals 'snake' by default.
     basic_cleaning: bool\n
         Performs basic cleaning of the strings if supplied. Performs three actions:
@@ -75,7 +76,7 @@ def clean_column_names(
     """
     return CleanColumnNames(
         object_,
-        case_type,
+        case,
         basic_cleaning,
         convert_duplicates,
         custom_transformation,
@@ -96,8 +97,8 @@ class CleanColumnNames:
     ----------
     object_: Union[List[Union[str, int]], pd.Index, pd.DataFrame]\n
         Messy strings in a list, pandas index or a pandas dataframe with messy columnames
-    case_type: str\n
-        Which case type to use, the alternatives are: snake (s) [case_type], camel (c) [caseType], pascal (p) [CaseType]. Not case sensitive.
+    case: str\n
+        Which case type to use, the alternatives are: snake (s) [case], camel (c) [caseType], pascal (p) [CaseType]. Not case sensitive.
         Equals 'snake' by default.
     basic_cleaning: bool\n
         Performs basic cleaning of the strings if supplied. Performs three actions:
@@ -168,14 +169,14 @@ class CleanColumnNames:
     a = ["CountryName", "subRegion"]
     b = clean_column_names(columns=a) # ["country_name", "sub_region"]
     # camelCase
-    c = clean_column_names(columns=b, case_type="camel") # ["countryName", "subRegion"]
+    c = clean_column_names(columns=b, case="camel") # ["countryName", "subRegion"]
     # PascalCase
-    d = clean_column_names(columns=b, case_type="pascal") # ["CountryName", "SubRegion"]
+    d = clean_column_names(columns=b, case="pascal") # ["CountryName", "SubRegion"]
     ```
     """
 
     object_: Union[List[Union[str, int]], pd.Index, pd.DataFrame]
-    case_type: str = "snake"
+    case: str = "snake"
     basic_cleaning: bool = True
     convert_duplicates: bool = True
     custom_transformation: Optional[Dict[str, str]] = None
@@ -287,7 +288,7 @@ class CleanColumnNames:
             columns = self._expressions_eval(
                 columns=columns, expressions=self.custom_expressions
             )
-        if self.case_type:
+        if self.case:
             _expressions = self._expressions_case_setter()
             columns = self._expressions_eval(columns=columns, expressions=_expressions)
         if self.convert_duplicates:
@@ -295,11 +296,11 @@ class CleanColumnNames:
         return columns
 
     def _expressions_case_setter(self):
-        if self.case_type.lower() not in ["camel", "pascal", "snake", "c", "p", "s"]:
+        if self.case.lower() not in ["camel", "pascal", "snake", "c", "p", "s"]:
             raise KeyError()
-        if self.case_type[0].lower() == "s":
+        if self.case[0].lower() == "s":
             return self.SNAKE
-        elif self.case_type[0].lower() == "c":
+        elif self.case[0].lower() == "c":
             return self.CAMEL
         else:
             return self.PASCAL

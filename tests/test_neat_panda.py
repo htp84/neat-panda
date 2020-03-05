@@ -214,42 +214,52 @@ class TestsCleanColumns:
         assert isinstance(clean_column_names(df), pd.DataFrame)
         assert isinstance(clean_column_names(df.columns), list)
 
+    def test_assert_not_alter_original_dataframe(self, old=nasty, new=clean):
+        df = pd.DataFrame(np.random.randint(0, 5, size=(5, 12)))
+        print(df)
+        df.columns = old
+        df2 = df.copy()
+        df.clean_column_names()
+        df2 = df2.clean_column_names()
+        assert df.columns.to_list() == old
+        assert df2.columns.to_list() == new
+
     def test_assert_correct_result_basic(self, old=nasty, new=clean):
-        assert clean_column_names(old, case_type="snake") == new
+        assert clean_column_names(old, case="snake") == new
 
     def test_assert_correct_result_camel_case1(
         self, old=actual_camel_case_names, new=snake_case_names
     ):
-        assert clean_column_names(old, case_type="snake") == new
+        assert clean_column_names(old, case="snake") == new
 
     def test_assert_correct_result_to_camelcase(
         self, old=snake_case_names, new=actual_camel_case_names
     ):
-        assert clean_column_names(old, case_type="camel") == new
+        assert clean_column_names(old, case="camel") == new
 
     def test_assert_correct_result_to_pascalcase(
         self, old=snake_case_names, new=actual_pascal_case_names
     ):
-        assert clean_column_names(old, case_type="pascal") == new
+        assert clean_column_names(old, case="pascal") == new
 
     def test_assert_correct_result_to_camelcase_large_letters(
         self, old=snake_case_names, new=actual_camel_case_names
     ):
-        old = clean_column_names(old, case_type="snake")
+        old = clean_column_names(old, case="snake")
         old = [i.upper() for i in old]
-        assert clean_column_names(old, case_type="camel") == new
+        assert clean_column_names(old, case="camel") == new
 
     def test_assert_correct_result_to_pascalcase_large_letters(
         self, old=snake_case_names, new=actual_pascal_case_names
     ):
-        old = clean_column_names(old, case_type="snake")
+        old = clean_column_names(old, case="snake")
         old = [i.upper() for i in old]
-        assert clean_column_names(old, case_type="pascal") == new
+        assert clean_column_names(old, case="pascal") == new
 
     def test_assert_errorenous_result_camel_case(
         self, old=faulty_camel_case_names, new=snake_case_names
     ):
-        assert clean_column_names(old, case_type="snake") != new
+        assert clean_column_names(old, case="snake") != new
 
     def test_assert_correct_result_custom(self, old=nasty, new=clean):
         cols3 = clean_column_names(
@@ -260,7 +270,7 @@ class TestsCleanColumns:
                 r'column.rstrip("_").lstrip("_")',
             ],
             convert_duplicates=True,
-            case_type="snake",
+            case="snake",
         )
         assert cols3 == new
 
@@ -271,7 +281,7 @@ class TestsCleanColumns:
             a,
             basic_cleaning=False,
             custom_transformation={"-": "#", "?": "!"},
-            case_type="snake",
+            case="snake",
             convert_duplicates=True,
         )
         assert c == b
@@ -308,7 +318,7 @@ class TestsCleanColumns:
             custom_transformation={"-": "", "?": "!"},
             convert_duplicates=True,
             custom_expressions=["column.title()"],
-            case_type=None,
+            case=None,
         )
         assert c == b
 
@@ -321,7 +331,7 @@ class TestsCleanColumns:
             custom_transformation={"-": "", "?": "!"},
             convert_duplicates=True,
             custom_expressions=["column.capitalize()"],
-            case_type=None,
+            case=None,
         )
         assert c == b
 
@@ -351,9 +361,9 @@ class TestsCleanColumns:
         clean_cols_camel = ["countryName", "continent", "yearNo", "actual"]
         clean_cols_pascal = ["CountryName", "Continent", "YearNo", "Actual"]
         df.columns = messy_cols
-        df_snake = df.clean_column_names(case_type="snake").copy()
-        df_camel = df.clean_column_names(case_type="camel").copy()
-        df_pascal = df.clean_column_names(case_type="pascal").copy()
+        df_snake = df.clean_column_names(case="snake").copy()
+        df_camel = df.clean_column_names(case="camel").copy()
+        df_pascal = df.clean_column_names(case="pascal").copy()
         assert df_snake.columns.tolist() == clean_cols_snake
         assert df_camel.columns.tolist() == clean_cols_camel
         assert df_pascal.columns.tolist() == clean_cols_pascal
@@ -365,11 +375,9 @@ class TestsCleanColumns:
         clean_cols_camel = ["countryName", "continent", "yearNo", "actual"]
         clean_cols_pascal = ["CountryName", "Continent", "YearNo", "Actual"]
         df.columns = messy_cols
-        df_snake = df.clean_column_names(case_type="snake", basic_cleaning=False).copy()
-        df_camel = df.clean_column_names(case_type="camel", basic_cleaning=False).copy()
-        df_pascal = df.clean_column_names(
-            case_type="pascal", basic_cleaning=False
-        ).copy()
+        df_snake = df.clean_column_names(case="snake", basic_cleaning=False).copy()
+        df_camel = df.clean_column_names(case="camel", basic_cleaning=False).copy()
+        df_pascal = df.clean_column_names(case="pascal", basic_cleaning=False).copy()
         assert df_snake.columns.tolist() == clean_cols_snake
         assert df_camel.columns.tolist() == clean_cols_camel
         assert df_pascal.columns.tolist() == clean_cols_pascal
