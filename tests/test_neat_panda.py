@@ -458,7 +458,15 @@ class TestSetOperations:
         )
         assert symmetric_difference(df, df1, dataframe_names=["df", "df1"]).equals(df3)
 
-    def test_basic_symmetric_difference_no_names(self, df=df):
+    def test_basic_symmetric_difference_no_names(self):
+        df = pd.DataFrame(
+            data={
+                "country": ["Sweden", "Sweden", "Denmark"],
+                "continent": ["Europe", "Europe", "Not known"],
+                "year": [2018, 2019, 2018],
+                "actual": [1, 2, 3],
+            }
+        )
         df1 = pd.DataFrame(
             data={
                 "country": ["Sweden", "Sweden", "Finland"],

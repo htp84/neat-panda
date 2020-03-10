@@ -1,3 +1,4 @@
+import inspect
 import pandas as pd
 from warnings import warn
 import toml
@@ -74,3 +75,47 @@ def _get_version_from_toml(path: str) -> str:
     with open(path, "r") as f:
         data = toml.loads(f.read())
         return data["tool"]["poetry"]["version"]
+
+
+def control_value(func):
+    def _control_value(*args, **kwargs):
+        if isinstance(args[0], pd.DataFrame):
+            dataframe1, dataframe2 = args[:2]
+        else:
+            dataframe1, dataframe2 = args[0].dataframe1, args[0].dataframe2
+        if not dataframe1.columns.to_list() == dataframe2.columns.to_list():
+            raise ValueError(
+                "The number of and names of the columns in the two dataframes must be identical."
+            )
+        dataframe = func(*args, **kwargs)
+        return dataframe
+
+    return _control_value
+
+
+def control_duplicates(func):
+    def _control_duplicates(*args, **kwargs):
+        if isinstance(args[0], pd.DataFrame):
+            dataframe1, dataframe2 = args[:2]
+        else:
+            dataframe1, dataframe2 = args[0].dataframe1, args[0].dataframe2
+        _duplicates_dataframe1 = dataframe1.duplicated().sum()
+        _duplicates_dataframe2 = dataframe2.duplicated().sum()
+        if _duplicates_dataframe1 > 0:
+            warn(
+                UserWarning(
+                    f"There are {_duplicates_dataframe1} duplicate rows in dataframe1. These are dropped in order to perform set operations"
+                )
+            )
+            dataframe1 = dataframe1.drop_duplicates()
+        if _duplicates_dataframe2 > 0:
+            warn(
+                UserWarning(
+                    f"There are {_duplicates_dataframe2} duplicate rows in dataframe2. These are dropped in order to perform set operations"
+                )
+            )
+            dataframe2 = dataframe2.drop_duplicates()
+        dataframe = func(*args, **kwargs)
+        return dataframe
+
+    return _control_duplicates
