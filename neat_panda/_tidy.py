@@ -51,7 +51,7 @@ def spread(
     Returns
     -------
     pd.DataFrame\n
-        A widened dataframess    test
+        A widened dataframe
 
     Example
     -------
