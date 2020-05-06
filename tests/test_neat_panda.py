@@ -31,7 +31,7 @@ df = pd.DataFrame(
 
 
 def test_version():
-    assert "0.9.5.3" == __version__ == _get_version_from_toml("pyproject.toml")
+    assert "0.9.6" == __version__ == _get_version_from_toml("pyproject.toml")
 
 
 class TestsSpread:
@@ -196,6 +196,20 @@ class TestsCleanColumns:
         "1",
     ]
 
+    nasty2 = [
+        "country____NAME",
+        "CountryName",
+        "Country_Name",
+        "country_Name",
+        "country_name",
+        "country-name£---",
+        "______country@name",
+    ]
+
+    clean_snake = "country_name"
+    clean_camel = "countryName"
+    clean_pascal = "CountryName"
+
     actual_camel_case_names = ["countryName", "subRegion", "iceHockey"]
 
     actual_pascal_case_names = ["CountryName", "SubRegion", "IceHockey"]
@@ -323,7 +337,7 @@ class TestsCleanColumns:
         assert c == b
 
     def test_assert_correct_result_custom6(self):
-        a = ["-Hello-", "Goodbye?", "hello_goodbye", "Hello_Goodbye"]
+        a = ["-Hello-", "Goodbye?", "hello_Goodbye", "Hello_Goodbye"]
         b = ["Hello", "Goodbye!", "Hello_goodbye1", "Hello_goodbye2"]
         c = clean_column_names(
             a,
@@ -334,6 +348,12 @@ class TestsCleanColumns:
             case=None,
         )
         assert c == b
+
+    def test_assert_correct_result_string(self):
+        for n in self.nasty2:
+            assert clean_column_names(n, case="snake") == self.clean_snake
+            assert clean_column_names(n, case="pascal") == self.clean_pascal
+            assert clean_column_names(n, case="camel") == self.clean_camel
 
     def test_assert_correct_result_dataframe(self, df=df):
         messy_cols = ["country    ", "continent£", "@@year   ", "actual"]
@@ -524,4 +544,3 @@ class TestSetOperations:
         )
         with pytest.warns(UserWarning):
             union(df1, df2)
-
