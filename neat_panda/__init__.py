@@ -4,12 +4,12 @@
 
 __author__ = """Henric Sundberg"""
 __email__ = "henric.sundberg@gmail.com"
-__version__ = "0.9.6"
+__version__ = "0.9.6.1"
 
 from ._tidy import spread, gather
 
 # from ._caretaker import clean_column_names, _clean_column_names
-from ._caretaker import clean_column_names, CleanColumnNames
+from ._caretaker import clean_column_names, CleanColumnNames, clean_strings
 
 from ._set_operations import (
     difference,

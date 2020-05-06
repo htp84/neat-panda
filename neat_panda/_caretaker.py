@@ -9,6 +9,26 @@ import pandas as pd
 import pandas_flavor as pf
 
 
+@pf.register_series_method
+def clean_strings(
+    object_: Union[List[Union[str, int]], pd.Index, pd.DataFrame],
+    case: str = "snake",
+    basic_cleaning: bool = True,
+    convert_duplicates: bool = True,
+    custom_transformation: Optional[Dict[str, str]] = None,
+    custom_expressions: Optional[List[str]] = None,
+):
+    return CleanColumnNames(
+        object_,
+        case,
+        basic_cleaning,
+        convert_duplicates,
+        custom_transformation,
+        custom_expressions,
+    ).clean_column_names()
+
+
+@pf.register_series_method
 @pf.register_dataframe_method
 def clean_column_names(
     object_: Union[List[Union[str, int]], pd.Index, pd.DataFrame],
@@ -207,19 +227,20 @@ class CleanColumnNames:
             raise KeyError(
                 "Both basic_cleaning and custom_transformation is set. This is not aloud. Choose one!"
             )
-        if not isinstance(self.object_, (str, list, pd.Index, pd.DataFrame)):
+        if not isinstance(self.object_, (str, list, pd.Index, pd.DataFrame, pd.Series)):
             raise TypeError(
-                f"The passed object_ is a {type(self.object_)}. It must be a string, a list, pandas index or a pandas dataframe!"
+                f"The passed object_ is a {type(self.object_)}. It must be a string, a list, pandas index, pandas series or a pandas dataframe!"
             )
         if isinstance(self.object_, str):
-            self.object_ = [self.object_]
-            return self._clean_column_names_list()[0]
+            return self._clean_column_names_str()
         elif isinstance(self.object_, pd.DataFrame):
             return self._clean_column_names_dataframe()
+        elif isinstance(self.object_, pd.Series):
+            return self._clean_column_names_series()
         else:
             return self._clean_column_names_list()
 
-    def _clean_column_names_list(self) -> List[str]:
+    def _clean_column_names_list(self, messy_string: Optional[str] = None) -> List[str]:
         """Cleans messy columnames. Written to be a utility function.
 
         Returns
@@ -227,10 +248,40 @@ class CleanColumnNames:
         List[str]\n
             Cleaned columnnames
         """
-        if self.basic_cleaning:
-            self.object_ = self._basic_cleaning(columns=self.object_)
-        self.object_ = self._clean_column_names(self.object_)
-        return self.object_
+        if not messy_string:
+            if self.basic_cleaning:
+                self.object_ = self._basic_cleaning(columns=self.object_)
+            self.object_ = self._clean_column_names(self.object_)
+            return self.object_
+        else:
+            messy_string = [messy_string]
+            if self.basic_cleaning:
+                messy_string = self._basic_cleaning(columns=messy_string)
+            messy_string = self._clean_column_names(messy_string)
+            return messy_string[0]
+
+    def _clean_column_names_str(self) -> str:
+        self.object_ = [self.object_]
+        return self._clean_column_names_list()[0]
+
+    def _clean_column_names_series(self) -> pd.Series:
+        """Cleans members of a messy string series. Written to be a utility function.
+
+        Returns
+        -------
+        pd.Series\n
+            Cleaned series
+        """
+        if not isinstance(self.object_, pd.Series):
+            raise TypeError(
+                f"The passed df is a {type(self.object_)}. It must be a pandas series!"
+            )
+        _type = self.object_.dtype.__str__()
+        _series = self.object_.copy()
+        _series = _series.apply(self._clean_column_names_list)
+        if _type == "string":
+            _series = _series.astype("string")
+        return _series
 
     def _basic_cleaning(self, columns) -> List[str]:
         return self._expressions_eval(

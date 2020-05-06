@@ -11,6 +11,7 @@ from neat_panda import (
     spread,
     gather,
     clean_column_names,
+    clean_strings,
     difference,
     intersection,
     symmetric_difference,
@@ -31,7 +32,7 @@ df = pd.DataFrame(
 
 
 def test_version():
-    assert "0.9.6" == __version__ == _get_version_from_toml("pyproject.toml")
+    assert "0.9.6.1" == __version__ == _get_version_from_toml("pyproject.toml")
 
 
 class TestsSpread:
@@ -204,6 +205,16 @@ class TestsCleanColumns:
         "country_name",
         "country-name£---",
         "______country@name",
+    ]
+
+    clean2 = [
+        "country_name",
+        "country_name",
+        "country_name",
+        "country_name",
+        "country_name",
+        "country_name",
+        "country_name",
     ]
 
     clean_snake = "country_name"
@@ -401,6 +412,17 @@ class TestsCleanColumns:
         assert df_snake.columns.tolist() == clean_cols_snake
         assert df_camel.columns.tolist() == clean_cols_camel
         assert df_pascal.columns.tolist() == clean_cols_pascal
+
+    def test_assert_correct_result_series(self):
+        df = pd.DataFrame(data=self.nasty2, columns=["a"])
+        df2 = pd.DataFrame(data=self.clean2, columns=["a"])
+        df.a = df.a.astype(str)
+        df2.a = df2.a.astype(str)
+        df3 = df.copy()
+        df3.a = df3.a.astype("string")
+        assert df.a.clean_column_names().equals(df2.a)
+        assert df.a.clean_strings().equals(df2.a)
+        assert df3.a.clean_strings().dtype.__str__() == "string"
 
 
 class TestSetOperations:

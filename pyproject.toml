@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "neat_panda"
-version = "0.9.6"
+version = "0.9.6.1"
 readme = "README.md"
 authors = ["Henric Sundberg, <henric.sundberg@gmail.com>"]
 description = ""
@@ -16,7 +16,7 @@ classifiers = ["Development Status :: 4 - Beta",
 
 [tool.poetry.dependencies]
 python = "^3.7"
-pandas = ">=0.24.2"
+pandas = ">=1.0.3"
 pandas_flavor = ">=0.1.2"
 toml = ">=0.10.0"
 
