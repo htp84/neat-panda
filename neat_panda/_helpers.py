@@ -1,4 +1,3 @@
-import inspect
 import pandas as pd
 from warnings import warn
 import toml
@@ -57,7 +56,7 @@ def _assure_consistent_value_dtypes(new_df, old_df, columns, value):
     if _error_columns:
         warn(
             UserWarning(
-                f"""Atleast one NaN is generated in the following columns: {", ".join(_error_columns)}. Hence, the type of these columns is set to Object."""
+                f"""At least one NaN is generated in the following columns: {", ".join(_error_columns)}. Hence, the type of these columns is set to Object."""
             )
         )
     return new_df
@@ -83,12 +82,11 @@ def control_value(func):
             dataframe1, dataframe2 = args[:2]
         else:
             dataframe1, dataframe2 = args[0].dataframe1, args[0].dataframe2
-        if not dataframe1.columns.to_list() == dataframe2.columns.to_list():
+        if dataframe1.columns.to_list() != dataframe2.columns.to_list():
             raise ValueError(
                 "The number of and names of the columns in the two dataframes must be identical."
             )
-        dataframe = func(*args, **kwargs)
-        return dataframe
+        return func(*args, **kwargs)
 
     return _control_value
 
@@ -115,7 +113,6 @@ def control_duplicates(func):
                 )
             )
             dataframe2 = dataframe2.drop_duplicates()
-        dataframe = func(*args, **kwargs)
-        return dataframe
+        return func(*args, **kwargs)
 
     return _control_duplicates

@@ -240,7 +240,9 @@ class CleanColumnNames:
         else:
             return self._clean_column_names_list()
 
-    def _clean_column_names_list(self, messy_string: Optional[str] = None) -> List[str]:
+    def _clean_column_names_list(
+        self, messy_string: Optional[str] = None
+    ) -> Union[List[str], str]:
         """Cleans messy columnames. Written to be a utility function.
 
         Returns
@@ -254,11 +256,11 @@ class CleanColumnNames:
             self.object_ = self._clean_column_names(self.object_)
             return self.object_
         else:
-            messy_string = [messy_string]
+            messy_list = [messy_string]
             if self.basic_cleaning:
-                messy_string = self._basic_cleaning(columns=messy_string)
-            messy_string = self._clean_column_names(messy_string)
-            return messy_string[0]
+                messy_list = self._basic_cleaning(columns=messy_list)
+            messy_list = self._clean_column_names(messy_list)
+            return messy_list[0]
 
     def _clean_column_names_str(self) -> str:
         self.object_ = [self.object_]
