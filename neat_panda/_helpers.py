@@ -82,9 +82,9 @@ def control_value(func):
             dataframe1, dataframe2 = args[:2]
         else:
             dataframe1, dataframe2 = args[0].dataframe1, args[0].dataframe2
-        if dataframe1.columns.to_list() != dataframe2.columns.to_list():
+        if len(dataframe1.columns.to_list()) != len(dataframe2.columns.to_list()):
             raise ValueError(
-                "The number of and names of the columns in the two dataframes must be identical."
+                "The number of columns in the two dataframes must be identical."
             )
         return func(*args, **kwargs)
 
