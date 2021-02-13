@@ -4,9 +4,9 @@
 
 __author__ = """Henric Sundberg"""
 __email__ = "henric.sundberg@gmail.com"
-__version__ = "0.9.6.3"
+__version__ = "0.9.7"
 
-from ._tidy import spread, gather
+from ._tidy import spread, gather, flatten_pivot
 
 # from ._caretaker import clean_column_names, _clean_column_names
 from ._caretaker import clean_column_names, CleanColumnNames, clean_strings

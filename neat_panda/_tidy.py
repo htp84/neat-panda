@@ -212,5 +212,47 @@ def gather(
     return new_df
 
 
-if __name__ == "__main__":
-    pass
+@pf.register_dataframe_method
+def flatten_pivot(df: pd.DataFrame, column_name_separator: str = ":"):
+    """flattens a pivoted dataframe. Note: for the method to work the columns and values parameters\n
+    in pivot_tables must be set as lists, e.g. df.pivot_table(index=["a"], columns=["b"], values=["c"]
+
+    Parameters
+    ----------
+    df : pd.DataFrame\n
+        A pivoted dataframe
+    column_name_separator : str, optional
+        If more than one column is used in the 'column' parameter of pivot_table, 'column_name_separator' will separate the , by default ":"
+
+    Returns
+    -------
+    pd.DataFrame\n
+        A flattened dataframe
+
+    Raises
+    ------
+    TypeError
+        Raised if the given dataframe do not have a names parameter
+    """
+    if df.index.names[0] is None:
+        raise TypeError(
+            "The multiindex must include a names property. Is the source table really a pivot_table?"
+        )
+    base_columns = list(df.index.names)
+    pivot_columns = df.columns.tolist()
+    _length = len(pivot_columns[0])
+    if _length > 2:
+        cleaned_columns = [
+            str(i[1:])
+            .replace(")", "")
+            .replace("(", "")
+            .replace("'", "")
+            .replace(", ", column_name_separator)
+            for i in pivot_columns
+        ]
+    else:
+        cleaned_columns = [str(i[1]) for i in pivot_columns]
+    flattened_columns = base_columns + cleaned_columns
+    _pivot = pd.DataFrame(df.copy().to_records())
+    _pivot.columns = flattened_columns
+    return _pivot

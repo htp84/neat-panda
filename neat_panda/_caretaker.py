@@ -419,6 +419,3 @@ class CleanColumnNames:
             r'column.replace("__","_")',  # remove double underscore and replace with single underscore
         ]
 
-
-if __name__ == "__main__":
-    pass

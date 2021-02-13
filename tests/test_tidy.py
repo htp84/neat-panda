@@ -1,6 +1,6 @@
 import pytest
 import pandas as pd
-from neat_panda import spread, gather
+from neat_panda import spread, gather, flatten_pivot
 
 dataframe = pd.DataFrame(
     data={
@@ -209,3 +209,35 @@ class TestsGather:
             drop_na=True,
             # convert=True,
         )
+
+
+class TestsFlatten:
+    def test_flatten_pivot1(self, dataframe_long):
+        pvt_1 = dataframe_long.pivot_table(
+            index=["country", "continent"],
+            columns=["year"],
+            values=["actual"],
+            fill_value=0,
+        )
+        flat_1 = pvt_1.flatten_pivot()
+        assert flat_1.columns.to_list() == ["country", "continent", "2018", "2019"]
+
+    def test_flatten_pivot2(self, dataframe_long):
+        pvt_1 = dataframe_long.pivot_table(
+            index=["country"],
+            columns=["year", "continent"],
+            values=["actual"],
+            fill_value=0,
+        )
+        flat_1 = pvt_1.flatten_pivot()
+        print(flat_1)
+        assert flat_1.columns.to_list() == [
+            "country",
+            "2018:Europe",
+            "2018:Not known",
+            "2019:Europe",
+        ]
+
+    def test_spread_errors(self, dataframe_long):
+        with pytest.raises(TypeError):
+            dataframe_long.flatten_pivot()

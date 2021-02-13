@@ -9,4 +9,4 @@ def test_version():
         _path = _path.parent / _file
     else:
         _path = _path / _file
-    assert "0.9.6.3" == __version__ == _get_version_from_toml(_path)
+    assert "0.9.7" == __version__ == _get_version_from_toml(_path)
