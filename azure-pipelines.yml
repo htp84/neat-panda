@@ -9,6 +9,8 @@ jobs:
           python.version: "3.7"
         py38:
           python.version: "3.8"
+        py39:
+          python.version: "3.9"
 
     pool:
       vmImage: ubuntu-latest
@@ -52,6 +54,8 @@ jobs:
           python.version: '3.7'
         Python38:
           python.version: '3.8'
+        Python39:
+          python.version: '3.9'
 
     steps:
     - task: UsePythonVersion@0
@@ -80,6 +84,8 @@ jobs:
           python.version: '3.7'
         Python38:
           python.version: '3.8'
+        Python39:
+          python.version: '3.9'
 
     steps:
     - task: UsePythonVersion@0
