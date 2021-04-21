@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "neat_panda"
-version = "0.9.8"
+version = "0.9.8.1"
 readme = "README.md"
 authors = ["Henric Sundberg, <henric.sundberg@gmail.com>"]
 description = ""

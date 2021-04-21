@@ -27,9 +27,10 @@ def read_clipboard_wsl(decimal: str = ".") -> None:
     [type]
         [description]
     """
-    return pd.read_csv(io.StringIO(pyperclip.paste()), sep="\t", decimal=decimal).drop(
-        columns="Unnamed: 0"
-    )
+    data = pd.read_csv(io.StringIO(pyperclip.paste()), sep="\t", decimal=decimal)
+    columns = data.columns.to_list()
+    columns = [col for col in columns if "Unnamed" in col]
+    return data.drop(columns=columns)
 
 
 @pf.register_dataframe_method

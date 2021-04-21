@@ -4,7 +4,7 @@
 
 __author__ = """Henric Sundberg"""
 __email__ = "henric.sundberg@gmail.com"
-__version__ = "0.9.8"
+__version__ = "0.9.8.1"
 
 from neat_panda._tidy import spread, gather, flatten_pivot
 
