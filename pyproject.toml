@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "neat_panda"
-version = "0.9.7"
+version = "0.9.8"
 readme = "README.md"
 authors = ["Henric Sundberg, <henric.sundberg@gmail.com>"]
 description = ""
@@ -20,6 +20,11 @@ python = "^3.7"
 pandas = ">=1.0.3"
 pandas_flavor = ">=0.1.2"
 toml = ">=0.10.0"
+
+pyperclip = { version = "^1.8.2", optional = true }
+
+[tool.poetry.extras]
+pyperclip = ["pyperclip"]
 
 [tool.poetry.dev-dependencies]
 pytest = ">=4.3.1"
